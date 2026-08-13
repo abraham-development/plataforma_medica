@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+      NEXT_PUBLIC_INSFORGE_URL: https://example.us-east.insforge.app
+      NEXT_PUBLIC_INSFORGE_ANON_KEY: ci-placeholder
+      INSFORGE_URL: https://example.us-east.insforge.app
+      INSFORGE_ANON_KEY: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @medicerca/api-client typecheck
+      - run: pnpm --filter @medicerca/api typecheck
+      - run: pnpm --filter @medicerca/web typecheck
+      - run: pnpm --filter @medicerca/api-client build
+      - run: pnpm --filter @medicerca/api build
+      - run: pnpm --filter @medicerca/web build
+      - run: pnpm --filter @medicerca/api test
+      - run: pnpm --filter @medicerca/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @medicerca/web test:e2e

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 52" role="img" aria-labelledby="title">
+  <title id="title">MediCerca</title>
+  <rect x="1" y="1" width="48" height="48" rx="15" fill="#0f9f83"/>
+  <path d="M25 11v28M11 25h28" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="38" cy="38" r="7" fill="#123047" stroke="white" stroke-width="2"/>
+  <text x="61" y="34" fill="#123047" font-family="Arial, sans-serif" font-size="27" font-weight="700">MediCerca</text>
+</svg>
+
