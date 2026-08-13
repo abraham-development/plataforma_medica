@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common'
+import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger'
 import {
   IsDateString,
@@ -52,7 +52,10 @@ export class AppointmentsController {
     @Req() req: AuthenticatedRequest,
     @Body() body: CreateAppointmentDto,
   ) {
-    const result = await this.insforge.forUser(req.accessToken).database.rpc('book_appointment', {
+    if (req.user.roles.includes('DOCTOR')) {
+      throw new ForbiddenException('Las cuentas médicas no pueden reservar citas')
+    }
+    const result = await this.insforge.forUser(req.accessToken).database.rpc('book_appointment_v2', {
       requested_doctor: body.doctorId,
       requested_start: body.startsAt,
       requested_mode: body.consultationMode,

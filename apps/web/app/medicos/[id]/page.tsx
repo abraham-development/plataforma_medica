@@ -2,8 +2,31 @@ import { createClient } from '@insforge/sdk'
 import { notFound } from 'next/navigation'
 import { House, Laptop, ShieldCheck } from 'lucide-react'
 import { BookingForm } from '@/components/booking-form'
+import { redirectDoctorToWorkspace } from '@/lib/auth/role-guards'
 export const dynamic = 'force-dynamic'
+
+function limaDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Lima',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+function addDays(dateKey: string, amount: number) {
+  const [year, month, day] = dateKey.split('-').map(Number)
+  const date = new Date(year, month - 1, day, 12)
+  date.setDate(date.getDate() + amount)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}`
+}
+
 export default async function DoctorPage({ params }: { params: Promise<{ id: string }> }) {
+  await redirectDoctorToWorkspace()
   const { id } = await params
   const client = createClient({
     baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL,
@@ -30,6 +53,36 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
     doctor_service_districts: { districts: { id: string; name: string; province: string } }[]
   }
   const districts = profile.doctor_service_districts.map((item) => item.districts)
+  const rangeStart = limaDateKey()
+  const rangeEnd = addDays(rangeStart, 60)
+  const [virtualSlotsResult, homeVisitSlotsResult] = await Promise.all([
+    profile.offers_virtual
+      ? client.database.rpc('get_doctor_available_slots', {
+          requested_doctor: id,
+          range_start: rangeStart,
+          range_end: rangeEnd,
+          requested_mode: 'VIRTUAL',
+        })
+      : Promise.resolve({ data: [], error: null }),
+    profile.offers_home_visit
+      ? client.database.rpc('get_doctor_available_slots', {
+          requested_doctor: id,
+          range_start: rangeStart,
+          range_end: rangeEnd,
+          requested_mode: 'HOME_VISIT',
+        })
+      : Promise.resolve({ data: [], error: null }),
+  ])
+  const availableSlots = [
+    ...((virtualSlotsResult.data ?? []) as { starts_at: string }[]).map((slot) => ({
+      startsAt: slot.starts_at,
+      consultationMode: 'VIRTUAL' as const,
+    })),
+    ...((homeVisitSlotsResult.data ?? []) as { starts_at: string }[]).map((slot) => ({
+      startsAt: slot.starts_at,
+      consultationMode: 'HOME_VISIT' as const,
+    })),
+  ]
   return (
     <section className="container-page py-14">
       <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
@@ -90,6 +143,7 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
             offersVirtual={profile.offers_virtual}
             offersHomeVisit={profile.offers_home_visit}
             districts={districts}
+            availableSlots={availableSlots}
           />
         </aside>
       </div>

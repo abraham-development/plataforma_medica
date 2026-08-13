@@ -1,33 +1,91 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { House, Laptop, LoaderCircle } from 'lucide-react'
 import { insforge } from '@/lib/insforge/client'
 
 type District = { id: string; name: string; province: string }
+type ConsultationMode = 'VIRTUAL' | 'HOME_VISIT'
+type AvailableSlot = { startsAt: string; consultationMode: ConsultationMode }
+
+const dateKeyFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Lima',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+const dateFormatter = new Intl.DateTimeFormat('es-PE', {
+  timeZone: 'America/Lima',
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+})
+const timeFormatter = new Intl.DateTimeFormat('es-PE', {
+  timeZone: 'America/Lima',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
+function dateKey(value: string) {
+  const parts = dateKeyFormatter.formatToParts(new Date(value))
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return `${values.year}-${values.month}-${values.day}`
+}
+
 export function BookingForm({
   doctorId,
   offersVirtual,
   offersHomeVisit,
   districts,
+  availableSlots,
 }: {
   doctorId: string
   offersVirtual: boolean
   offersHomeVisit: boolean
   districts: District[]
+  availableSlots: AvailableSlot[]
 }) {
   const router = useRouter()
   const initialMode = offersVirtual ? 'VIRTUAL' : 'HOME_VISIT'
-  const [mode, setMode] = useState(initialMode)
+  const [mode, setMode] = useState<ConsultationMode>(initialMode)
   const [pending, setPending] = useState(false)
   const [notice, setNotice] = useState('')
-  const minimum = useMemo(() => {
-    const date = new Date(Date.now() + 30 * 60_000)
-    date.setMinutes(date.getMinutes() < 30 ? 30 : 60, 0, 0)
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
-  }, [])
+  const modeSlots = useMemo(
+    () =>
+      availableSlots
+        .filter((slot) => slot.consultationMode === mode)
+        .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
+    [availableSlots, mode],
+  )
+  const availableDates = useMemo(
+    () => Array.from(new Set(modeSlots.map((slot) => dateKey(slot.startsAt)))),
+    [modeSlots],
+  )
+  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedStart, setSelectedStart] = useState('')
+
+  useEffect(() => {
+    const firstDate = availableDates[0] ?? ''
+    setSelectedDate(firstDate)
+    setSelectedStart(modeSlots.find((slot) => dateKey(slot.startsAt) === firstDate)?.startsAt ?? '')
+  }, [availableDates, modeSlots])
+
+  const slotsForSelectedDate = modeSlots.filter(
+    (slot) => dateKey(slot.startsAt) === selectedDate,
+  )
+
+  function chooseDate(value: string) {
+    setSelectedDate(value)
+    setSelectedStart(modeSlots.find((slot) => dateKey(slot.startsAt) === value)?.startsAt ?? '')
+  }
+
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!selectedStart) {
+      setNotice('Selecciona un horario disponible.')
+      return
+    }
     setPending(true)
     setNotice('')
     const form = new FormData(event.currentTarget)
@@ -48,7 +106,7 @@ export function BookingForm({
       },
       body: JSON.stringify({
         doctorId,
-        startsAt: new Date(String(form.get('startsAt'))).toISOString(),
+        startsAt: selectedStart,
         consultationMode: mode,
         ...(mode === 'HOME_VISIT'
           ? {
@@ -99,19 +157,56 @@ export function BookingForm({
         </div>
       </fieldset>
       <div>
-        <label className="label" htmlFor="startsAt">
-          Fecha y hora
-        </label>
-        <input
-          className="field"
-          id="startsAt"
-          name="startsAt"
-          type="datetime-local"
-          min={minimum}
-          step="1800"
-          required
-        />
+        <p className="label">Fecha disponible</p>
+        {availableDates.length ? (
+          <div className="grid max-h-52 grid-cols-2 gap-2 overflow-y-auto pr-1">
+            {availableDates.map((value) => {
+              const example = modeSlots.find((slot) => dateKey(slot.startsAt) === value)
+              return (
+                <button
+                  aria-pressed={selectedDate === value}
+                  className={`rounded-xl border px-3 py-2.5 text-sm font-bold capitalize ${
+                    selectedDate === value
+                      ? 'border-mint bg-emerald-50 text-mint'
+                      : 'border-slate-200 bg-white'
+                  }`}
+                  key={value}
+                  onClick={() => chooseDate(value)}
+                  type="button"
+                >
+                  {example ? dateFormatter.format(new Date(example.startsAt)) : value}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="rounded-xl bg-cloud p-4 text-sm text-slate-600">
+            El médico aún no publicó horarios para esta modalidad.
+          </p>
+        )}
       </div>
+      {slotsForSelectedDate.length > 0 && (
+        <div>
+          <p className="label">Hora</p>
+          <div className="grid grid-cols-3 gap-2">
+            {slotsForSelectedDate.map((slot) => (
+              <button
+                aria-pressed={selectedStart === slot.startsAt}
+                className={`rounded-lg border px-2 py-2.5 text-sm font-bold ${
+                  selectedStart === slot.startsAt
+                    ? 'border-mint bg-mint text-white'
+                    : 'border-slate-200 bg-white hover:border-mint'
+                }`}
+                key={slot.startsAt}
+                onClick={() => setSelectedStart(slot.startsAt)}
+                type="button"
+              >
+                {timeFormatter.format(new Date(slot.startsAt))}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {mode === 'HOME_VISIT' && (
         <>
           <div>
@@ -161,7 +256,7 @@ export function BookingForm({
           {notice}
         </p>
       )}
-      <button className="btn-primary" disabled={pending}>
+      <button className="btn-primary" disabled={pending || !selectedStart}>
         {pending && <LoaderCircle className="animate-spin" size={18} />} Confirmar reserva
       </button>
     </form>

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import { createClient } from '@insforge/sdk'
 import { DoctorSearch } from '@/components/doctor-search'
+import { redirectDoctorToWorkspace } from '@/lib/auth/role-guards'
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Buscar médicos' }
 export default async function DoctorsPage() {
+  await redirectDoctorToWorkspace()
   const client = createClient({
     baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL,
     anonKey: process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY,

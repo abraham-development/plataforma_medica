@@ -1,16 +1,18 @@
 import { Body, Controller, Delete, Get, Patch, Post, Put, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger'
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
-  IsInt,
+  IsIn,
   IsOptional,
   IsString,
   IsUrl,
-  Max,
   MaxLength,
-  Min,
+  Matches,
+  ValidateNested,
 } from 'class-validator'
+import { Type } from 'class-transformer'
 import { Roles } from '../common/roles.decorator'
 import type { AuthenticatedRequest } from '../common/request-user'
 import { InsForgeService } from './insforge.service'
@@ -29,15 +31,24 @@ class DoctorProfileDto extends PatientProfileDto {
   @IsArray() districtIds: string[]
 }
 class AvailabilityItemDto {
-  @ApiProperty({ minimum: 1, maximum: 7 }) @IsInt() @Min(1) @Max(7) weekday: number
-  @IsString() startTime: string
-  @IsString() endTime: string
-  @ApiProperty({ enum: ['VIRTUAL', 'HOME_VISIT'] }) @IsString() consultationMode:
+  @ApiProperty({ example: '2026-08-18' })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  availabilityDate: string
+
+  @Matches(/^([01]\d|2[0-3]):(00|30)$/) startTime: string
+  @Matches(/^([01]\d|2[0-3]):(00|30)$/) endTime: string
+  @ApiProperty({ enum: ['VIRTUAL', 'HOME_VISIT'] })
+  @IsIn(['VIRTUAL', 'HOME_VISIT'])
+  consultationMode:
     | 'VIRTUAL'
     | 'HOME_VISIT'
 }
 class AvailabilityDto {
-  @IsArray() items: AvailabilityItemDto[]
+  @IsArray()
+  @ArrayMaxSize(600)
+  @ValidateNested({ each: true })
+  @Type(() => AvailabilityItemDto)
+  items: AvailabilityItemDto[]
 }
 
 @ApiTags('profiles')
@@ -69,7 +80,7 @@ export class ProfilesController {
         .single(),
     )
   }
-  @Roles('DOCTOR') @Get('doctors/me') async doctor(@Req() req: AuthenticatedRequest) {
+  @Roles('DOCTOR') @Get('me/doctor-profile') async doctor(@Req() req: AuthenticatedRequest) {
     return this.insforge.unwrap(
       await this.insforge
         .forUser(req.accessToken)
@@ -120,25 +131,35 @@ export class ProfilesController {
       )
     return profile.data
   }
+  @Roles('DOCTOR') @Get('doctors/me/availability') async getAvailability(
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.insforge.unwrap(
+      await this.insforge
+        .forUser(req.accessToken)
+        .database.from('doctor_availability_dates')
+        .select('id,availability_date,start_time,end_time,consultation_mode')
+        .eq('doctor_id', req.user.id)
+        .eq('active', true)
+        .gte('availability_date', new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' }))
+        .order('availability_date', { ascending: true })
+        .order('start_time', { ascending: true })
+        .limit(600),
+    )
+  }
   @Roles('DOCTOR') @Put('doctors/me/availability') async availability(
     @Req() req: AuthenticatedRequest,
     @Body() body: AvailabilityDto,
   ) {
     const client = this.insforge.forUser(req.accessToken)
-    await client.database.from('doctor_availability').delete().eq('doctor_id', req.user.id)
-    if (!body.items.length) return []
-    const result = await client.database
-      .from('doctor_availability')
-      .insert(
-        body.items.map((item) => ({
-          doctor_id: req.user.id,
-          weekday: item.weekday,
-          start_time: item.startTime,
-          end_time: item.endTime,
-          consultation_mode: item.consultationMode,
-        })),
-      )
-      .select()
+    const result = await client.database.rpc('replace_doctor_availability_dates', {
+      availability_items: body.items.map((item) => ({
+        availability_date: item.availabilityDate,
+        start_time: item.startTime,
+        end_time: item.endTime,
+        consultation_mode: item.consultationMode,
+      })),
+    })
     return this.insforge.unwrap(result)
   }
 }

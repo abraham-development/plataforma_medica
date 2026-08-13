@@ -3,10 +3,76 @@ import Link from 'next/link'
 import { Menu } from 'lucide-react'
 import { createInsForgeServerClient } from '@/lib/insforge/server'
 import { signOut } from '@/app/actions/auth'
+import { doctorWorkspaceLinks } from '@/lib/doctor-workspace'
+
+function DoctorHeader() {
+  return (
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="border-b border-slate-100">
+        <div className="container-page flex min-h-20 items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href="/medico" aria-label="MediCerca, ir al panel médico">
+              <Image
+                src="/logo.svg"
+                alt="MediCerca"
+                width={220}
+                height={52}
+                priority
+                className="h-11 w-auto"
+              />
+            </Link>
+            <span className="hidden border-l border-slate-200 pl-4 text-sm font-bold text-ocean sm:inline">
+              Panel médico
+            </span>
+          </div>
+          <form action={signOut}>
+            <button className="btn-secondary" type="submit">
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
+      </div>
+      <nav
+        aria-label="Navegación del espacio médico"
+        className="container-page flex min-h-14 items-center justify-between"
+      >
+        <div className="hidden items-center gap-8 font-semibold md:flex">
+          {doctorWorkspaceLinks.map((link) => (
+            <Link href={link.href} key={link.href}>
+              {link.label}
+            </Link>
+          ))}
+        </div>
+        <details className="relative md:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-2 py-3 font-bold">
+            <Menu size={20} /> Menú médico
+          </summary>
+          <div className="absolute left-0 top-12 grid min-w-64 gap-1 rounded-2xl border bg-white p-3 shadow-soft">
+            {doctorWorkspaceLinks.map((link) => (
+              <Link className="p-3" href={link.href} key={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </details>
+        <span className="ml-auto text-sm font-semibold text-mint">Área profesional</span>
+      </nav>
+    </header>
+  )
+}
 
 export async function Header() {
   const client = await createInsForgeServerClient()
   const { data } = await client.auth.getCurrentUser()
+  if (data?.user) {
+    const { data: roles } = await client.database
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', data.user.id)
+    if ((roles ?? []).some((item) => (item as { role: string }).role === 'DOCTOR')) {
+      return <DoctorHeader />
+    }
+  }
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="border-b border-slate-100">
@@ -75,7 +141,7 @@ export async function Header() {
             </Link>
           </div>
         </details>
-        <span className="ml-auto text-sm font-semibold text-ocean">Lima y Callao</span>
+        <span className="ml-auto text-sm font-semibold text-ocean">Lima Metropolitana</span>
       </nav>
     </header>
   )
