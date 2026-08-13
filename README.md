@@ -22,12 +22,16 @@ MVP de marketplace médico para Lima y Callao. Conecta pacientes con médicos me
 
 ```bash
 corepack pnpm install
-cp .env.example .env
-cp .env.example apps/api/.env
-cp .env.example apps/web/.env.local
+cp .env.example .env.local
 ```
 
-Complete las URLs y claves anónimas. La clave administrativa solo se usa en procesos internos y nunca debe empezar por `NEXT_PUBLIC_`.
+Complete las URLs y claves anónimas en `.env.local`. El comando de desarrollo carga este archivo
+desde la raíz y comparte las variables con Next.js y NestJS. La clave administrativa solo se usa
+en procesos internos y nunca debe empezar por `NEXT_PUBLIC_`.
+
+`.env.example` es la plantilla versionada; `.env.local` y `.env.production` contienen valores reales
+y permanecen fuera de Git. En producción, es preferible registrar estos valores como variables
+protegidas del proveedor. El archivo `.env.production` se usa al desplegar con Docker Compose.
 
 ```bash
 npx -y @insforge/cli login

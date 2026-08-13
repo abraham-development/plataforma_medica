@@ -1,7 +1,32 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["NODE_ENV"],
   "tasks": {
-    "dev": { "cache": false, "persistent": true },
+    "@medicerca/web#dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_INSFORGE_URL",
+        "NEXT_PUBLIC_INSFORGE_ANON_KEY"
+      ]
+    },
+    "@medicerca/api#dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["PORT", "WEB_URL", "INSFORGE_URL", "INSFORGE_ANON_KEY"]
+    },
+    "@medicerca/web#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**"],
+      "env": [
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_INSFORGE_URL",
+        "NEXT_PUBLIC_INSFORGE_ANON_KEY"
+      ]
+    },
     "build": { "dependsOn": ["^build"], "outputs": [".next/**", "dist/**"] },
     "lint": { "dependsOn": ["^lint"] },
     "typecheck": { "dependsOn": ["^typecheck"] },

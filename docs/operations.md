@@ -22,4 +22,13 @@ El registro público y `complete_registration` rechazan el rol `ADMIN`.
 - Despliegue `apps/web` después de fijar las variables `NEXT_PUBLIC_*`; Next.js las incorpora durante el build.
 - Compruebe `/api/v1/health`, `/api/docs`, registro OTP, reserva y cancelación.
 
+Para construir los dos contenedores en Hostinger con el archivo de producción:
+
+```bash
+docker compose --env-file .env.production up -d --build
+```
+
+Antes de ejecutar el comando, reemplace `TU_DOMINIO.com` dentro de `.env.production`. Configure el dominio principal
+para el servicio web en el puerto 3000 y el subdominio `api` para la API en el puerto 4000.
+
 Los Dockerfiles y `docker-compose.yml` permiten construir ambos servicios. InsForge permanece como servicio administrado y no se incluye en Compose.
