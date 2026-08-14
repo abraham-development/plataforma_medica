@@ -1,5 +1,10 @@
 [auth]
-allowed_redirect_urls = ["http://localhost:3000/login", "http://localhost:3000/recuperar-contrasena"]
+allowed_redirect_urls = [
+  "http://localhost:3000/login",
+  "http://localhost:3000/recuperar-contrasena",
+  "https://olive-cobra-454922.hostingersite.com/login",
+  "https://olive-cobra-454922.hostingersite.com/recuperar-contrasena",
+]
 require_email_verification = true
 verify_email_method = "code"
 reset_password_method = "code"
@@ -11,4 +16,3 @@ require_number = true
 require_lowercase = true
 require_uppercase = true
 require_special_char = false
-

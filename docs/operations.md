@@ -4,6 +4,10 @@
 
 Use una rama backend de InsForge para cada cambio de esquema. Aplique `insforge.toml` y las migraciones allí, ejecute pruebas y use `branch merge --dry-run` antes de fusionar. No guarde `INSFORGE_API_KEY` en el repositorio ni la exponga al navegador.
 
+### Migración pendiente de InsForge
+
+`20260813171000_harden-function-access.sql` está pendiente y no debe reintentarse automáticamente. InsForge ejecuta la migración como `project_admin`, pero las tablas creadas anteriormente pertenecen a `postgres`; por eso la modificación de políticas falla con `must be owner of relation specialties`. El fallo fue transaccional y no aplicó cambios parciales. Mantenga el archivo local como pendiente hasta que InsForge corrija la propiedad o proporcione un procedimiento oficial compatible.
+
 ## Primer administrador
 
 1. Registre una cuenta normal y confirme su correo por OTP.
@@ -22,13 +26,18 @@ El registro público y `complete_registration` rechazan el rol `ADMIN`.
 - Despliegue `apps/web` después de fijar las variables `NEXT_PUBLIC_*`; Next.js las incorpora durante el build.
 - Compruebe `/api/v1/health`, `/api/docs`, registro OTP, reserva y cancelación.
 
-Para construir los dos contenedores en Hostinger con el archivo de producción:
+El despliegue vigente usa dos Web Apps administradas en Hostinger desde el mismo monorepo:
 
 ```bash
-docker compose --env-file .env.production up -d --build
+# apps/web
+pnpm run build
+pnpm run start
+
+# apps/api
+pnpm run build
+pnpm run start
 ```
 
-Antes de ejecutar el comando, reemplace `TU_DOMINIO.com` dentro de `.env.production`. Configure el dominio principal
-para el servicio web en el puerto 3000 y el subdominio `api` para la API en el puerto 4000.
+Use `apps/web` y `apps/api` como directorios raíz independientes, Node.js 24, pnpm y `PORT=3000` en cada Web App. Registre las variables de entorno en Hostinger antes de construir y no suba `.env.production`.
 
-Los Dockerfiles y `docker-compose.yml` permiten construir ambos servicios. InsForge permanece como servicio administrado y no se incluye en Compose.
+Los Dockerfiles y `docker-compose.yml` se conservan únicamente como alternativa futura para un VPS. InsForge permanece como servicio administrado y no se incluye en Compose.

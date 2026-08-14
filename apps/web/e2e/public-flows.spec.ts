@@ -23,7 +23,9 @@ test('registro ofrece OTP, roles y controles independientes de contraseña', asy
 
 test('la propuesta muestra exactamente las dos modalidades', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('Consulta virtual', { exact: true })).toBeVisible()
-  await expect(page.getByText('Atención a domicilio', { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Consulta virtual', exact: true }).first()).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Atención a domicilio', exact: true }).first(),
+  ).toBeVisible()
   await expect(page.getByText(/consulta presencial/i)).toHaveCount(0)
 })

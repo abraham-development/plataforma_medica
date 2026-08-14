@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.15.1",
   "engines": {
-    "node": ">=20.9.0"
+    "node": "24.x"
   },
   "scripts": {
     "postinstall": "corepack enable --install-directory node_modules/.bin pnpm",
