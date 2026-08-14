@@ -2,8 +2,8 @@
 allowed_redirect_urls = [
   "http://localhost:3000/login",
   "http://localhost:3000/recuperar-contrasena",
-  "https://olive-cobra-454922.hostingersite.com/login",
-  "https://olive-cobra-454922.hostingersite.com/recuperar-contrasena",
+  "https://darkblue-sardine-667162.hostingersite.com/login",
+  "https://darkblue-sardine-667162.hostingersite.com/recuperar-contrasena",
 ]
 require_email_verification = true
 verify_email_method = "code"
