@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { APP_GUARD } from '@nestjs/core'
+import { join } from 'node:path'
 import { HealthController } from './modules/health.controller'
 import { InsForgeService } from './modules/insforge.service'
 import { AuthGuard } from './common/auth.guard'
@@ -15,7 +16,15 @@ import { AdminController } from './modules/admin.controller'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [
+        join(__dirname, '..', '.env.production'),
+        join(__dirname, '..', '.env'),
+        '.env.production',
+        '.env',
+      ],
+    }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
   ],
   controllers: [
