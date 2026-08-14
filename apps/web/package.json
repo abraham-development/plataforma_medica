@@ -2,15 +2,14 @@
   "name": "@medicerca/web",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@11.21.0",
   "engines": {
     "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
-    "postbuild": "node scripts/prepare-standalone.mjs",
-    "start": "node .next/standalone/server.js",
+    "build:standalone": "NEXT_OUTPUT_MODE=standalone next build --webpack && node scripts/prepare-standalone.mjs",
+    "start": "next start",
     "lint": "next lint || tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand --passWithNoTests",
@@ -18,7 +17,6 @@
   },
   "dependencies": {
     "@insforge/sdk": "1.5.2",
-    "@medicerca/api-client": "workspace:*",
     "lucide-react": "0.542.0",
     "next": "16.3.0",
     "react": "19.2.0",

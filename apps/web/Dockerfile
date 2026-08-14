@@ -10,10 +10,10 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_INSFORGE_URL=$NEXT_PUBLIC_INSFORGE_URL
 ENV NEXT_PUBLIC_INSFORGE_ANON_KEY=$NEXT_PUBLIC_INSFORGE_ANON_KEY
 COPY . .
-RUN pnpm install --frozen-lockfile && pnpm --filter @medicerca/web build
+RUN pnpm install --frozen-lockfile && pnpm --filter @medicerca/web build:standalone
 FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/apps/web/.next ./.next
+COPY --from=build /app/apps/web/.next/standalone ./
 EXPOSE 3000
-CMD ["node", ".next/standalone/server.js"]
+CMD ["node", "server.js"]

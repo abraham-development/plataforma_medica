@@ -98,9 +98,6 @@ importers:
       '@insforge/sdk':
         specifier: 1.5.2
         version: 1.5.2
-      '@medicerca/api-client':
-        specifier: workspace:*
-        version: link:../../packages/api-client
       lucide-react:
         specifier: 0.542.0
         version: 0.542.0(react@19.2.0)

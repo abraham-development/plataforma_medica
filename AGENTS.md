@@ -64,6 +64,8 @@ La estrategia actual es **Hostinger Deploy Web App administrado**, sin Docker Co
 2. Desplegar NestJS como otra Web App desde el mismo repositorio, por ejemplo en `api.medicerca.com`.
 3. Registrar las variables de cada aplicación en el panel de Hostinger; no subir `.env.production`.
 
+En hPanel, la Web App de Next.js usa raíz `apps/web`, Node 24, npm, build `npm run build` y salida `.next`. Esta excepción evita que el runtime pierda `next` por los enlaces del almacén pnpm ubicado en la raíz del monorepo. El desarrollo local y la API continúan usando pnpm.
+
 Comandos desde la raíz del repositorio:
 
 ```bash
