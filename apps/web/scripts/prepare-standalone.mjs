@@ -1,4 +1,4 @@
-import { access, cp, readdir, readlink, rm, symlink } from 'node:fs/promises'
+import { access, cp, readdir, readlink, rename, rm, symlink } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -46,3 +46,13 @@ await cp(path.join(webDirectory, 'public'), path.join(standaloneDirectory, 'publ
 })
 await rm(path.join(standaloneDirectory, 'apps'), { recursive: true, force: true })
 await makeSymlinksPortable(standaloneDirectory)
+
+// Hostinger generates its own server.js when `.next` is the configured output.
+// Put the portable runtime dependencies at that output root so its generated
+// entry file can resolve `next`, while the standalone server reuses them.
+const standaloneNodeModules = path.join(standaloneDirectory, 'node_modules')
+const outputNodeModules = path.join(nextDirectory, 'node_modules')
+
+await rm(outputNodeModules, { recursive: true, force: true })
+await rename(standaloneNodeModules, outputNodeModules)
+await symlink('../node_modules', standaloneNodeModules)

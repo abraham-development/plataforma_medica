@@ -69,7 +69,7 @@ corepack pnpm --filter @medicerca/web build
 corepack pnpm --filter @medicerca/web start
 ```
 
-En Hostinger mantener el tipo `Next.js`, la raíz `apps/web`, el build `build`, la salida `.next/standalone` y el archivo de entrada `server.js`. La web traza el artefacto desde la raíz del monorepo para incluir el almacén virtual de pnpm; `scripts/prepare-standalone.mjs` aplana la aplicación dentro de esa salida, añade `public` y los estáticos, y convierte los enlaces internos en rutas relativas portables.
+En Hostinger mantener el tipo `Next.js`, la raíz `apps/web`, el build `build` y la salida `.next`; el preset administrado genera su propio `server.js`. La web traza el artefacto desde la raíz del monorepo y `scripts/prepare-standalone.mjs` coloca el `node_modules` portable en la raíz de `.next`, de modo que el archivo generado por Hostinger pueda resolver `next`; el servidor standalone reutiliza esas dependencias mediante un enlace relativo.
 
 No usar Docker Compose para el despliegue administrado actual.
 
