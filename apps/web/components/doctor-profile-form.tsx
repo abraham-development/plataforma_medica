@@ -58,7 +58,7 @@ export function DoctorProfileForm() {
     setter(list.includes(value) ? list.filter((i) => i !== value) : [...list, value])
   }
   return (
-    <form onSubmit={save} className="card grid gap-5 p-6">
+    <form onSubmit={save} className="card grid gap-5 p-4 sm:p-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="label">Nombres completos</label>
@@ -166,7 +166,7 @@ export function DoctorProfileForm() {
           {notice}
         </p>
       )}
-      <button className="btn-primary w-fit">Guardar y enviar a revisión</button>
+      <button className="btn-primary w-full sm:w-fit">Guardar y enviar a revisión</button>
     </form>
   )
 }

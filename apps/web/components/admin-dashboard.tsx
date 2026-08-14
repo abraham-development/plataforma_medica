@@ -63,7 +63,7 @@ export function AdminDashboard() {
           <h2 className="text-xl font-bold">Verificación de médicos</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="min-w-[720px] w-full text-left">
             <thead className="bg-cloud text-sm">
               <tr>
                 <th className="p-4">Médico</th>

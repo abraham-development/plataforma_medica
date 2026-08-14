@@ -4,10 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { isDoctorWorkspacePath } from '@/lib/doctor-workspace'
 
 export function SiteFooter() {
   const pathname = usePathname()
-  if (pathname.startsWith('/medico')) return null
+  if (isDoctorWorkspacePath(pathname)) return null
 
   return (
     <footer className="mt-20 border-t border-slate-200 bg-white py-12">

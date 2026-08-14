@@ -153,13 +153,13 @@ export function AppointmentList() {
                   </a>
                 )}
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
               <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-sm font-bold text-mint">
                 {statusLabels[item.status]}
               </span>
               {item.status === 'CONFIRMED' && (patientCanCancel || doctorCanCancel) && (
                 <button
-                  className="btn-secondary"
+                  className="btn-secondary flex-1 sm:flex-none"
                   disabled={busy === item.id}
                   onClick={() => cancel(item)}
                 >
@@ -169,14 +169,14 @@ export function AppointmentList() {
               {item.status === 'CONFIRMED' && canClose && (
                 <>
                   <button
-                    className="btn-secondary"
+                    className="btn-secondary flex-1 sm:flex-none"
                     disabled={busy === item.id}
                     onClick={() => void call(item.id, 'outcome', { status: 'COMPLETED' })}
                   >
                     Completar
                   </button>
                   <button
-                    className="btn-secondary"
+                    className="btn-secondary flex-1 sm:flex-none"
                     disabled={busy === item.id}
                     onClick={() => void call(item.id, 'outcome', { status: 'NO_SHOW' })}
                   >

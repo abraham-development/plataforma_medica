@@ -127,7 +127,7 @@ export function BookingForm({
     setTimeout(() => router.push('/paciente/citas'), 900)
   }
   return (
-    <form onSubmit={submit} className="card grid gap-5 p-6">
+    <form onSubmit={submit} className="card grid gap-5 p-4 sm:p-6">
       <h2 className="text-2xl font-black">Reserva tu cita</h2>
       <fieldset>
         <legend className="label">Modalidad</legend>

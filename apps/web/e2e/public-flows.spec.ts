@@ -39,6 +39,8 @@ test('buscar médicos integra especialidades, perfiles y disponibilidad', async 
 
   await publicNavigation.getByRole('link', { name: 'Buscar médicos' }).click()
   await expect(page.getByRole('heading', { name: '¿Qué tipo de atención necesitas?' })).toBeVisible()
+  await expect(page.getByText('Panel médico', { exact: true })).toHaveCount(0)
+  await expect(page.getByRole('contentinfo')).toBeVisible()
 
   await page.getByRole('button', { name: /Pediatría/i }).click()
   await expect(page.getByText('3 resultados')).toBeVisible()

@@ -4,3 +4,7 @@ export const doctorWorkspaceLinks = [
   { href: '/medico/agenda', label: 'Agenda' },
   { href: '/medico/disponibilidad', label: 'Disponibilidad' },
 ]
+
+export function isDoctorWorkspacePath(pathname: string) {
+  return pathname === '/medico' || pathname.startsWith('/medico/')
+}

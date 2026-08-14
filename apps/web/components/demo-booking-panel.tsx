@@ -93,7 +93,7 @@ export function DemoBookingPanel({
         </p>
       </div>
 
-      <div className="grid gap-6 p-6">
+      <div className="grid gap-6 p-4 sm:p-6">
         <fieldset>
           <legend className="label">1. Modalidad</legend>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">

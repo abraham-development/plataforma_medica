@@ -3,7 +3,7 @@ import { ResetForm } from '@/components/auth-forms'
 export const metadata: Metadata = { title: 'Recuperar contraseña' }
 export default function ResetPage() {
   return (
-    <section className="container-page py-14">
+    <section className="container-page py-8 sm:py-14">
       <div className="card mx-auto max-w-md p-6 sm:p-9">
         <h1 className="text-center text-3xl font-black">Recupera tu acceso</h1>
         <p className="mb-7 mt-2 text-center text-slate-600">

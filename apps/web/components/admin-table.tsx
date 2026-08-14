@@ -30,7 +30,7 @@ export function AdminTable({
         <h2 className="text-xl font-bold">{title}</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
+        <table className="min-w-[680px] w-full text-left text-sm">
           <thead className="bg-cloud">
             <tr>
               {rows[0] &&

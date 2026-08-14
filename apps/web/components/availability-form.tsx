@@ -244,11 +244,11 @@ export function AvailabilityForm() {
   return (
     <div className="card overflow-hidden">
       <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,.85fr)]">
-        <section className="border-b p-5 sm:p-7 lg:border-b-0 lg:border-r" aria-label="Calendario">
+        <section className="border-b p-4 sm:p-7 lg:border-b-0 lg:border-r" aria-label="Calendario">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-mint">Calendario de disponibilidad</p>
-              <h2 className="mt-1 text-2xl font-black capitalize">
+              <h2 className="mt-1 text-xl font-black capitalize sm:text-2xl">
                 {monthFormatter.format(new Date(visibleMonth.year, visibleMonth.month, 1))}
               </h2>
             </div>
@@ -291,7 +291,7 @@ export function AvailabilityForm() {
                   aria-label={`${day} de ${monthFormatter.format(new Date(visibleMonth.year, visibleMonth.month, 1))}${
                     dayItems.length ? `, ${dayItems.length} horarios configurados` : ''
                   }`}
-                  className={`relative min-h-14 rounded-xl border text-sm font-bold transition sm:min-h-16 ${
+                  className={`relative min-h-11 rounded-lg border text-xs font-bold transition sm:min-h-16 sm:rounded-xl sm:text-sm ${
                     selected
                       ? 'border-mint bg-mint text-white shadow-md'
                       : dayItems.length
@@ -324,7 +324,7 @@ export function AvailabilityForm() {
           </div>
         </section>
 
-        <section className="p-5 sm:p-7" aria-label="Horarios del día seleccionado">
+        <section className="p-4 sm:p-7" aria-label="Horarios del día seleccionado">
           <div className="flex items-start gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-50 text-mint">
               <CalendarDays size={23} />
@@ -397,7 +397,7 @@ export function AvailabilityForm() {
                 Activa una modalidad en tu perfil para seleccionar horas.
               </div>
             ) : (
-              <div className="mt-3 grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="mt-3 grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1 min-[380px]:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
                 {selectableTimes.map((time) => {
                   const active = selectedModeSlots.some((item) => item.startTime === time.start)
                   return (

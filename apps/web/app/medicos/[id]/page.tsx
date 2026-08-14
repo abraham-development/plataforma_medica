@@ -18,14 +18,12 @@ import {
 } from 'lucide-react'
 import { BookingForm } from '@/components/booking-form'
 import { DemoBookingPanel } from '@/components/demo-booking-panel'
-import { redirectDoctorToWorkspace } from '@/lib/auth/role-guards'
 import {
   getDemoAvailableSlots,
   getDemoDoctor,
   type PatientReview,
 } from '@/lib/demo-doctors'
 
-export const dynamic = 'force-dynamic'
 
 function limaDateKey(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -103,7 +101,6 @@ function ProfileAvatar({ profile }: { profile: ProfileView }) {
 }
 
 export default async function DoctorPage({ params }: { params: Promise<{ id: string }> }) {
-  await redirectDoctorToWorkspace()
   const { id } = await params
   const demoDoctor = getDemoDoctor(id)
   const rangeStart = limaDateKey()

@@ -178,7 +178,7 @@ export function DoctorSearch({
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
               autoComplete="off"
-              className="field min-h-14 pl-12 text-base shadow-sm"
+              className="field min-h-14 !pl-12 text-base shadow-sm"
               value={specialtyTerm}
               onChange={(event) => setSpecialtyTerm(event.target.value)}
               placeholder="Busca pediatría, psicología…"
@@ -255,7 +255,7 @@ export function DoctorSearch({
               <span className="sr-only">Buscar médico por nombre</span>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
               <input
-                className="field pl-11"
+                className="field !pl-11"
                 value={doctorTerm}
                 onChange={(event) => setDoctorTerm(event.target.value)}
                 placeholder="Buscar por nombre"

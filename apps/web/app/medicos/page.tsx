@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { createClient } from '@insforge/sdk'
 import { DoctorSearch } from '@/components/doctor-search'
-import { redirectDoctorToWorkspace } from '@/lib/auth/role-guards'
 import {
   demoDoctors,
   demoSpecialties,
@@ -9,7 +8,6 @@ import {
   type DirectorySpecialty,
 } from '@/lib/demo-doctors'
 
-export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Buscar médicos por especialidad',
   description: 'Elige una especialidad, compara profesionales y revisa su disponibilidad.',
@@ -55,7 +53,6 @@ export default async function DoctorsPage({
 }: {
   searchParams: Promise<{ especialidad?: string | string[] }>
 }) {
-  await redirectDoctorToWorkspace()
   const filters = await searchParams
   const requestedSpecialty = Array.isArray(filters.especialidad)
     ? filters.especialidad[0]

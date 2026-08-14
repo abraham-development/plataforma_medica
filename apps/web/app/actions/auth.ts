@@ -77,6 +77,13 @@ export async function verifyRegistration(
   const registration = await client.database.rpc('complete_registration', { initial_role: role })
   if (registration.error)
     return { ok: false, message: message(registration.error, 'No pudimos completar tu perfil.') }
+  store.set('medicerca_role', role, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
+  })
   store.delete('medicerca_pending_email')
   store.delete('medicerca_pending_role')
   return {
@@ -109,7 +116,8 @@ export async function signIn(
   _previous: ActionState = initial,
   formData: FormData,
 ): Promise<ActionState> {
-  const auth = createAuthActions({ cookies: await cookies() })
+  const store = await cookies()
+  const auth = createAuthActions({ cookies: store })
   const { data, error } = await auth.signInWithPassword({
     email: String(formData.get('email') ?? '')
       .trim()
@@ -118,12 +126,30 @@ export async function signIn(
   })
   if (error || !data?.user)
     return { ok: false, message: message(error, 'Correo o contraseña incorrectos.') }
+  const client = createServerClient({ cookies: store })
+  const { data: roles } = await client.database
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', data.user.id)
+  const values = (roles ?? []) as { role: string }[]
+  const role = values.find((item) => item.role === 'DOCTOR')?.role ?? values[0]?.role
+  if (role) {
+    store.set('medicerca_role', role, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    })
+  }
   return { ok: true, message: 'Sesión iniciada.' }
 }
 
 export async function signOut() {
-  const auth = createAuthActions({ cookies: await cookies() })
+  const store = await cookies()
+  const auth = createAuthActions({ cookies: store })
   await auth.signOut()
+  store.delete('medicerca_role')
   redirect('/')
 }
 

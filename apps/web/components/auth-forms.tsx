@@ -32,7 +32,7 @@ function PasswordField({ name, label }: { name: string; label: string }) {
       </label>
       <div className="relative">
         <input
-          className="field pr-12"
+          className="field !pr-12"
           id={name}
           name={name}
           type={visible ? 'text' : 'password'}
@@ -70,6 +70,7 @@ export function RegisterForm() {
   }, [state.ok])
   useEffect(() => {
     if (verifyState.ok) {
+      window.dispatchEvent(new Event('medicerca:auth-changed'))
       const timeout = setTimeout(() => router.push('/panel'), 900)
       return () => clearTimeout(timeout)
     }
@@ -152,7 +153,7 @@ export function RegisterForm() {
       <PasswordField name="confirmation" label="Confirmar contraseña" />
       <fieldset>
         <legend className="label">Quiero usar MediCerca como</legend>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <label className="cursor-pointer rounded-xl border p-4 has-[:checked]:border-mint has-[:checked]:bg-emerald-50">
             <input type="radio" name="role" value="PATIENT" defaultChecked />{' '}
             <span className="ml-2 font-bold">Paciente</span>
@@ -176,7 +177,10 @@ export function LoginForm() {
   const router = useRouter()
   const [state, action, pending] = useActionState(signIn, initial)
   useEffect(() => {
-    if (state.ok) router.push('/panel')
+    if (state.ok) {
+      window.dispatchEvent(new Event('medicerca:auth-changed'))
+      router.push('/panel')
+    }
   }, [state.ok, router])
   return (
     <form action={action} className="grid gap-5">

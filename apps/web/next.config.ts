@@ -5,6 +5,7 @@ const standalone = process.env.NEXT_OUTPUT_MODE === 'standalone'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   ...(standalone
     ? {
         output: 'standalone' as const,

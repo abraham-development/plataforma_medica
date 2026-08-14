@@ -25,6 +25,7 @@ Antes de cambiar una API o convención de Next.js, consultar la documentación i
 - No mostrar al médico autenticado el menú público de búsqueda, especialidades o funcionamiento, ni agregarle flujos para reservar con otro médico.
 - Paciente y administrador conservan layouts y permisos separados.
 - Los layouts de rol deben validar sesión y rol en el servidor antes de renderizar el panel.
+- El encabezado resuelve la sesión con el cliente SSR del navegador para no bloquear ni volver dinámicas las páginas públicas. La cookie `medicerca_role` es solo una pista de navegación; nunca reemplaza la validación autoritativa de los layouts protegidos.
 
 ## Autenticación
 
@@ -86,3 +87,4 @@ corepack pnpm --filter @medicerca/web build
 ```
 
 Usar Playwright para cambios de flujos críticos como autenticación, paneles, disponibilidad o reserva.
+Mantener una experiencia mobile-first desde 320 px, controles táctiles de al menos 44 px y tablas administrativas dentro de contenedores con desplazamiento horizontal.
