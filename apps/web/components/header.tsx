@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Menu } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { signOut } from '@/app/actions/auth'
 import { doctorWorkspaceLinks, isDoctorWorkspacePath } from '@/lib/doctor-workspace'
 import { insforge } from '@/lib/insforge/client'
@@ -12,6 +12,75 @@ import { insforge } from '@/lib/insforge/client'
 type SessionState = {
   status: 'loading' | 'anonymous' | 'authenticated'
   role: string | null
+}
+
+function MobileNavigation({
+  id,
+  label,
+  links,
+}: {
+  id: string
+  label: string
+  links: readonly { href: string; label: string }[]
+}) {
+  const pathname = usePathname()
+  const [open, setOpen] = useState(false)
+  const container = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!open) return
+
+    function closeOnOutsidePress(event: PointerEvent) {
+      if (!container.current?.contains(event.target as Node)) setOpen(false)
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsidePress)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePress)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [open])
+
+  return (
+    <div className="relative md:hidden" ref={container}>
+      <button
+        aria-controls={id}
+        aria-expanded={open}
+        aria-label={`${open ? 'Cerrar' : 'Abrir'} ${label.toLowerCase()}`}
+        className="flex min-h-11 items-center gap-2 py-2 font-bold"
+        onClick={() => setOpen((current) => !current)}
+        type="button"
+      >
+        {open ? <X size={20} /> : <Menu size={20} />} {label}
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 top-11 z-50 grid w-[min(17rem,calc(100vw-1.25rem))] gap-1 rounded-2xl border bg-white p-3 shadow-soft"
+          id={id}
+        >
+          {links.map((link) => (
+            <Link
+              className="rounded-xl p-3 hover:bg-cloud"
+              href={link.href}
+              key={link.href}
+              onClick={() => setOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function Brand({ doctor = false }: { doctor?: boolean }) {
@@ -64,18 +133,11 @@ function DoctorHeader() {
             </Link>
           ))}
         </div>
-        <details className="group relative md:hidden">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 py-2 font-bold">
-            <Menu size={20} /> Menú médico
-          </summary>
-          <div className="absolute left-0 top-11 z-50 grid w-[min(17rem,calc(100vw-1.25rem))] gap-1 rounded-2xl border bg-white p-3 shadow-soft">
-            {doctorWorkspaceLinks.map((link) => (
-              <Link className="rounded-xl p-3 hover:bg-cloud" href={link.href} key={link.href}>
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </details>
+        <MobileNavigation
+          id="mobile-doctor-navigation"
+          label="Menú médico"
+          links={doctorWorkspaceLinks}
+        />
         <span className="ml-auto whitespace-nowrap text-xs font-semibold text-mint sm:text-sm">
           Área profesional
         </span>
@@ -163,16 +225,15 @@ export function Header() {
           <Link className="rounded-lg py-2 hover:text-mint" href="/medicos">Buscar médicos</Link>
           <Link className="rounded-lg py-2 hover:text-mint" href="/#como-funciona">Cómo funciona</Link>
         </div>
-        <details className="relative md:hidden">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 py-2 font-bold">
-            <Menu size={20} /> Menú
-          </summary>
-          <div className="absolute left-0 top-11 z-50 grid w-[min(17rem,calc(100vw-1.25rem))] gap-1 rounded-2xl border bg-white p-3 shadow-soft">
-            <Link className="rounded-xl p-3 hover:bg-cloud" href="/">Inicio</Link>
-            <Link className="rounded-xl p-3 hover:bg-cloud" href="/medicos">Buscar médicos</Link>
-            <Link className="rounded-xl p-3 hover:bg-cloud" href="/#como-funciona">Cómo funciona</Link>
-          </div>
-        </details>
+        <MobileNavigation
+          id="mobile-public-navigation"
+          label="Menú"
+          links={[
+            { href: '/', label: 'Inicio' },
+            { href: '/medicos', label: 'Buscar médicos' },
+            { href: '/#como-funciona', label: 'Cómo funciona' },
+          ]}
+        />
         <span className="ml-auto whitespace-nowrap text-xs font-semibold text-ocean sm:text-sm">
           Lima Metropolitana
         </span>

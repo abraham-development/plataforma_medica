@@ -33,10 +33,20 @@ test('el menú público móvil conserva accesos táctiles', async ({ page }) => 
   await page.goto('/')
 
   await expect(page.getByRole('link', { name: 'Entrar' })).toBeVisible()
-  await page.getByText('Menú', { exact: true }).click()
-  await expect(
-    page
-      .getByRole('navigation', { name: 'Navegación principal' })
-      .getByRole('link', { name: 'Buscar médicos' }),
-  ).toBeVisible()
+  const navigation = page.getByRole('navigation', { name: 'Navegación principal' })
+  const menuButton = navigation.getByRole('button', { name: /menú/i })
+
+  await menuButton.click()
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'true')
+  await navigation.getByRole('link', { name: 'Buscar médicos' }).click()
+  await expect(page).toHaveURL(/\/medicos/)
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+
+  await menuButton.click()
+  await page.keyboard.press('Escape')
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+
+  await menuButton.click()
+  await page.getByRole('heading', { name: /Encuentra a tu médico/ }).click()
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
 })
