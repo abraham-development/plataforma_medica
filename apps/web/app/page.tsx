@@ -1,7 +1,10 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight,
+  Baby,
   BadgeCheck,
+  Brain,
   CalendarCheck,
   Check,
   ChevronRight,
@@ -61,6 +64,31 @@ const principles = [
     icon: UserRoundCheck,
     title: 'Atención que se adapta',
     text: 'Dos formas de atenderse para responder a diferentes necesidades y momentos de vida.',
+  },
+]
+
+const featuredSpecialties = [
+  {
+    name: 'Pediatría',
+    slug: 'pediatria',
+    icon: Baby,
+    description: 'Cuidado cercano para bebés, niñas, niños y adolescentes.',
+    doctors: [
+      '/doctors/alejandro-rios.png',
+      '/doctors/veronica-salazar.png',
+      '/doctors/camila-torres.png',
+    ],
+  },
+  {
+    name: 'Psicología',
+    slug: 'psicologia',
+    icon: Brain,
+    description: 'Acompañamiento emocional para recuperar bienestar y avanzar.',
+    doctors: [
+      '/doctors/paola-mendoza.png',
+      '/doctors/jorge-vargas.png',
+      '/doctors/lucia-fernandez.png',
+    ],
   },
 ]
 
@@ -165,6 +193,63 @@ export default function HomePage() {
               <Icon className="shrink-0 text-mint" size={22} />
               <span className="text-sm font-bold text-slate-700">{label}</span>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container-page py-20 sm:py-24">
+        <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <div className="max-w-3xl">
+            <p className="font-black uppercase tracking-[.18em] text-mint">Empieza por tu necesidad</p>
+            <h2 className="mt-4 text-balance text-3xl font-black sm:text-5xl">
+              Elige una especialidad y conoce a sus profesionales.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-600">
+              Buscar médicos y explorar especialidades ahora es un solo recorrido: primero eliges
+              la atención que necesitas y después comparas perfiles, experiencia y horarios.
+            </p>
+          </div>
+          <Link className="inline-flex items-center gap-2 font-black text-ocean" href="/medicos">
+            Ver todas las especialidades <ArrowRight size={18} />
+          </Link>
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          {featuredSpecialties.map(({ name, slug, icon: Icon, description, doctors }) => (
+            <Link
+              className="group relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-soft sm:p-9"
+              href={`/medicos?especialidad=${slug}`}
+              key={slug}
+            >
+              <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-emerald-50 transition duration-500 group-hover:scale-125" />
+              <div className="relative flex items-start justify-between gap-5">
+                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-mint">
+                  <Icon size={27} />
+                </span>
+                <div className="flex -space-x-3">
+                  {doctors.map((src, index) => (
+                    <span
+                      className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-cloud shadow-sm"
+                      key={src}
+                    >
+                      <Image
+                        alt={`Profesional de ${name} ${index + 1}`}
+                        className="object-cover"
+                        fill
+                        sizes="48px"
+                        src={src}
+                      />
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <h3 className="relative mt-8 text-3xl font-black">{name}</h3>
+              <p className="relative mt-3 max-w-xl leading-7 text-slate-600">{description}</p>
+              <span className="relative mt-7 inline-flex items-center gap-2 font-black text-ocean">
+                Conocer 3 especialistas{' '}
+                <ChevronRight className="transition group-hover:translate-x-1" size={18} />
+              </span>
+            </Link>
           ))}
         </div>
       </section>

@@ -19,6 +19,8 @@ Antes de cambiar una API o convención de Next.js, consultar la documentación i
 ## Navegación y mundos por rol
 
 - Sitio público: header con top bar (logotipo a la izquierda; iniciar sesión y crear cuenta a la derecha) y una barra de navegación separada para el menú público.
+- El descubrimiento público se concentra en `Buscar médicos` (`/medicos`): primero se elige la especialidad, después se comparan profesionales y finalmente se abre el perfil con disponibilidad. `/especialidades` solo redirige a ese recorrido y no debe aparecer como opción independiente.
+- Los perfiles locales de muestra deben identificarse claramente como ficticios; sus fotos, reseñas, registros y horarios nunca se presentan como datos médicos reales.
 - Médico: navegación exclusiva con este orden: `Resumen`, `Perfil profesional`, `Agenda`, `Disponibilidad`. El rótulo superior es `Panel médico`.
 - No mostrar al médico autenticado el menú público de búsqueda, especialidades o funcionamiento, ni agregarle flujos para reservar con otro médico.
 - Paciente y administrador conservan layouts y permisos separados.

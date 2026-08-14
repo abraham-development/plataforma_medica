@@ -119,7 +119,6 @@ export async function Header() {
         <div className="hidden items-center gap-8 font-semibold md:flex">
           <Link href="/">Inicio</Link>
           <Link href="/medicos">Buscar médicos</Link>
-          <Link href="/especialidades">Especialidades</Link>
           <Link href="/#como-funciona">Cómo funciona</Link>
         </div>
         <details className="relative md:hidden">
@@ -132,9 +131,6 @@ export async function Header() {
             </Link>
             <Link className="p-3" href="/medicos">
               Buscar médicos
-            </Link>
-            <Link className="p-3" href="/especialidades">
-              Especialidades
             </Link>
             <Link className="p-3" href="/#como-funciona">
               Cómo funciona
