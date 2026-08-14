@@ -42,7 +42,7 @@ Puertos locales:
 - API base: `http://localhost:4000/api/v1`.
 - Swagger: `http://localhost:4000/api/docs`.
 
-El script raíz prepara un shim local de pnpm mediante Corepack; conservar `predev` y `postinstall` mientras Turbo necesite encontrar el ejecutable del gestor de paquetes. No recomendar `npm run dev -- --port 3000` para este monorepo.
+El script `predev` prepara un shim local de pnpm mediante Corepack cuando Turbo lo necesita en desarrollo. No agregar un `postinstall` que ejecute `corepack enable`: los entornos administrados de Hostinger ya proporcionan pnpm y bloquean la creación manual de ese enlace durante la instalación. No recomendar `npm run dev -- --port 3000` para este monorepo.
 
 ## Variables de entorno
 

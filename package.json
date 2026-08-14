@@ -7,7 +7,6 @@
     "node": "24.x"
   },
   "scripts": {
-    "postinstall": "corepack enable --install-directory node_modules/.bin pnpm",
     "predev": "corepack enable --install-directory node_modules/.bin pnpm",
     "dev": "node --env-file=.env.local node_modules/turbo/bin/turbo dev",
     "build": "turbo build",
