@@ -2,6 +2,7 @@ node_modules/
 .pnpm-store/
 .turbo/
 .next/
+.hostinger-output/
 dist/
 coverage/
 playwright-report/
