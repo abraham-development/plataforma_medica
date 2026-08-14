@@ -69,6 +69,8 @@ corepack pnpm --filter @medicerca/web build
 corepack pnpm --filter @medicerca/web start
 ```
 
+En Hostinger mantener el tipo `Next.js`, la raíz `apps/web`, el build `build` y la salida `.next`. Esta Web App usa el servidor Node.js estándar de Next mediante `next start`; no activar `output: 'standalone'`, que se reserva para el artefacto autocontenido del flujo Docker.
+
 No usar Docker Compose para el despliegue administrado actual.
 
 ## Validación
