@@ -14,6 +14,34 @@ type SessionState = {
   role: string | null
 }
 
+const anonymousSession: SessionState = { status: 'anonymous', role: null }
+const SESSION_TIMEOUT_MS = 4_000
+
+function hasBrowserInsforgeConfig() {
+  const baseUrl = process.env.NEXT_PUBLIC_INSFORGE_URL
+  const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY
+
+  return Boolean(
+    baseUrl && anonKey && !baseUrl.includes('://example.') && anonKey !== 'ci-placeholder',
+  )
+}
+
+async function resolveBrowserSession(): Promise<SessionState> {
+  const { data } = await insforge.auth.getCurrentUser()
+  if (!data.user) return anonymousSession
+
+  const { data: roles } = await insforge.database
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', data.user.id)
+  const values = (roles ?? []) as { role: string }[]
+
+  return {
+    status: 'authenticated',
+    role: values.find((item) => item.role === 'DOCTOR')?.role ?? values[0]?.role ?? null,
+  }
+}
+
 function MobileNavigation({
   id,
   label,
@@ -116,7 +144,10 @@ function DoctorHeader() {
         <div className="container-page flex min-h-16 items-center justify-between gap-3 sm:min-h-20">
           <Brand doctor />
           <form action={signOut}>
-            <button className="btn-secondary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base" type="submit">
+            <button
+              className="btn-secondary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base"
+              type="submit"
+            >
               Cerrar sesión
             </button>
           </form>
@@ -152,21 +183,26 @@ export function Header() {
   const [session, setSession] = useState<SessionState>({ status: 'loading', role: null })
 
   const loadSession = useCallback(async () => {
-    const { data } = await insforge.auth.getCurrentUser()
-    if (!data.user) {
-      setSession({ status: 'anonymous', role: null })
+    if (!hasBrowserInsforgeConfig()) {
+      setSession(anonymousSession)
       return
     }
 
-    const { data: roles } = await insforge.database
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', data.user.id)
-    const values = (roles ?? []) as { role: string }[]
-    setSession({
-      status: 'authenticated',
-      role: values.find((item) => item.role === 'DOCTOR')?.role ?? values[0]?.role ?? null,
-    })
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+    try {
+      const nextSession = await Promise.race([
+        resolveBrowserSession(),
+        new Promise<SessionState>((resolve) => {
+          timeoutId = setTimeout(() => resolve(anonymousSession), SESSION_TIMEOUT_MS)
+        }),
+      ])
+      setSession(nextSession)
+    } catch {
+      setSession(anonymousSession)
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [])
 
   useEffect(() => {
@@ -190,25 +226,37 @@ export function Header() {
           <Brand />
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {session.status === 'loading' ? (
-              <div aria-label="Comprobando sesión" className="h-10 w-36 animate-pulse rounded-xl bg-slate-100 sm:w-52" />
+              <div
+                aria-label="Comprobando sesión"
+                className="h-10 w-36 animate-pulse rounded-xl bg-slate-100 sm:w-52"
+              />
             ) : session.status === 'authenticated' ? (
               <>
                 <Link className="btn-secondary hidden sm:inline-flex" href="/panel">
                   Mi cuenta
                 </Link>
                 <form action={signOut}>
-                  <button className="btn-primary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base" type="submit">
+                  <button
+                    className="btn-primary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base"
+                    type="submit"
+                  >
                     Cerrar sesión
                   </button>
                 </form>
               </>
             ) : (
               <>
-                <Link className="btn-secondary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base" href="/login">
+                <Link
+                  className="btn-secondary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base"
+                  href="/login"
+                >
                   <span className="sm:hidden">Entrar</span>
                   <span className="hidden sm:inline">Iniciar sesión</span>
                 </Link>
-                <Link className="btn-primary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base" href="/registro">
+                <Link
+                  className="btn-primary whitespace-nowrap !px-3 !py-2 text-sm sm:!px-4 sm:!py-3 sm:text-base"
+                  href="/registro"
+                >
                   Crear cuenta
                 </Link>
               </>
@@ -221,9 +269,15 @@ export function Header() {
         className="container-page flex min-h-12 items-center justify-between gap-3 sm:min-h-14"
       >
         <div className="hidden items-center gap-5 font-semibold md:flex lg:gap-8">
-          <Link className="rounded-lg py-2 hover:text-mint" href="/">Inicio</Link>
-          <Link className="rounded-lg py-2 hover:text-mint" href="/medicos">Buscar médicos</Link>
-          <Link className="rounded-lg py-2 hover:text-mint" href="/#como-funciona">Cómo funciona</Link>
+          <Link className="rounded-lg py-2 hover:text-mint" href="/">
+            Inicio
+          </Link>
+          <Link className="rounded-lg py-2 hover:text-mint" href="/medicos">
+            Buscar médicos
+          </Link>
+          <Link className="rounded-lg py-2 hover:text-mint" href="/#como-funciona">
+            Cómo funciona
+          </Link>
         </div>
         <MobileNavigation
           id="mobile-public-navigation"

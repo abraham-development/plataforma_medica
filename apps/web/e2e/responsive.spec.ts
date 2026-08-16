@@ -26,6 +26,25 @@ for (const viewport of viewports) {
       expect(overflow).toBeLessThanOrEqual(1)
     })
   }
+
+  test(`el hero principal conserva su contenido en ${viewport.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height })
+    await page.goto('/')
+
+    const heroHeading = page.getByRole('heading', { name: 'Tu salud, más cerca de ti.' })
+    const hero = heroHeading.locator('xpath=ancestor::section')
+
+    await expect(heroHeading).toBeVisible()
+    await expect(hero.getByRole('link', { name: 'Buscar un médico' })).toBeVisible()
+
+    const heroImage = page.getByAltText(
+      'Médica atendiendo con cercanía a una madre y su hija en casa',
+    )
+    await expect(heroImage).toBeVisible()
+    await expect
+      .poll(() => heroImage.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+  })
 }
 
 test('el menú público móvil conserva accesos táctiles', async ({ page }) => {
