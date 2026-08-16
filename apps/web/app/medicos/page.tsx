@@ -25,6 +25,66 @@ type LiveDoctor = {
   doctor_specialties: { specialties: { id: string; name: string; slug: string } }[]
 }
 
+type LiveSpecialty = {
+  id: string
+  name: string
+  slug: string
+}
+
+const LIVE_DIRECTORY_TIMEOUT_MS = 4_000
+
+function hasLiveDirectoryConfig(baseUrl?: string, anonKey?: string) {
+  return Boolean(
+    baseUrl && anonKey && !baseUrl.includes('://example.') && anonKey !== 'ci-placeholder',
+  )
+}
+
+async function loadLiveDirectory(): Promise<{
+  doctors: LiveDoctor[]
+  specialties: LiveSpecialty[]
+}> {
+  const baseUrl = process.env.NEXT_PUBLIC_INSFORGE_URL
+  const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY
+
+  if (!hasLiveDirectoryConfig(baseUrl, anonKey)) {
+    return { doctors: [], specialties: [] }
+  }
+
+  const client = createClient({ baseUrl, anonKey })
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(
+      () => reject(new Error('InsForge directory request timed out')),
+      LIVE_DIRECTORY_TIMEOUT_MS,
+    )
+  })
+
+  try {
+    const [doctorsResult, specialtiesResult] = await Promise.race([
+      Promise.all([
+        client.database
+          .from('doctor_profiles')
+          .select(
+            'user_id,first_name,last_name,cmp,bio,avatar_url,offers_virtual,offers_home_visit,doctor_specialties(specialties(id,name,slug))',
+          )
+          .eq('verification_status', 'VERIFIED')
+          .limit(50),
+        client.database.from('specialties').select('id,name,slug').eq('active', true).order('name'),
+      ]),
+      timeout,
+    ])
+
+    return {
+      doctors: (doctorsResult.data ?? []) as unknown as LiveDoctor[],
+      specialties: (specialtiesResult.data ?? []) as unknown as LiveSpecialty[],
+    }
+  } catch {
+    return { doctors: [], specialties: [] }
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
+  }
+}
+
 const specialtyCopy: Record<string, Pick<DirectorySpecialty, 'description' | 'prompt'>> = {
   'medicina-general': {
     description: 'Orientación inicial, prevención y seguimiento de la salud cotidiana.',
@@ -58,22 +118,9 @@ export default async function DoctorsPage({
     ? filters.especialidad[0]
     : filters.especialidad
 
-  const client = createClient({
-    baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL,
-    anonKey: process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY,
-  })
-  const [doctorsResult, specialtiesResult] = await Promise.all([
-    client.database
-      .from('doctor_profiles')
-      .select(
-        'user_id,first_name,last_name,cmp,bio,avatar_url,offers_virtual,offers_home_visit,doctor_specialties(specialties(id,name,slug))',
-      )
-      .eq('verification_status', 'VERIFIED')
-      .limit(50),
-    client.database.from('specialties').select('id,name,slug').eq('active', true).order('name'),
-  ])
+  const liveDirectory = await loadLiveDirectory()
 
-  const liveDoctors = ((doctorsResult.data ?? []) as unknown as LiveDoctor[]).map(
+  const liveDoctors = liveDirectory.doctors.map(
     (doctor): DirectoryDoctor => ({
       user_id: doctor.user_id,
       first_name: doctor.first_name ?? 'Profesional',
@@ -97,9 +144,7 @@ export default async function DoctorsPage({
 
   const specialtyMap = new Map<string, DirectorySpecialty>()
   demoSpecialties.forEach((specialty) => specialtyMap.set(specialty.slug, specialty))
-  ;(
-    (specialtiesResult.data ?? []) as unknown as { id: string; name: string; slug: string }[]
-  ).forEach((specialty) => {
+  liveDirectory.specialties.forEach((specialty) => {
     const demoCopy = specialtyMap.get(specialty.slug)
     const copy = specialtyCopy[specialty.slug]
     specialtyMap.set(specialty.slug, {
@@ -107,7 +152,9 @@ export default async function DoctorsPage({
       name: specialty.name,
       slug: specialty.slug,
       description:
-        demoCopy?.description ?? copy?.description ?? 'Encuentra profesionales para esta necesidad.',
+        demoCopy?.description ??
+        copy?.description ??
+        'Encuentra profesionales para esta necesidad.',
       prompt: demoCopy?.prompt ?? copy?.prompt ?? 'Conoce perfiles y horarios disponibles.',
     })
   })
