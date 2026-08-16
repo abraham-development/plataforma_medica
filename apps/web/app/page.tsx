@@ -95,88 +95,87 @@ const featuredSpecialties = [
 export default function HomePage() {
   return (
     <>
-      <section className="relative isolate overflow-hidden border-b border-slate-100 bg-[#f7fbfb]">
-        <div className="absolute -left-32 top-24 -z-10 h-80 w-80 rounded-full bg-sky-100/70 blur-3xl" />
-        <div className="absolute -right-28 bottom-0 -z-10 h-96 w-96 rounded-full bg-emerald-100/80 blur-3xl" />
-        <div className="container-page grid min-h-[680px] items-center gap-14 py-16 lg:grid-cols-[1.08fr_.92fr] lg:py-20">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm font-bold text-mint shadow-sm">
-              <MapPin size={16} /> Operando en Lima Metropolitana
+      <section className="relative isolate overflow-hidden bg-ink text-white">
+        <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_15%_15%,rgba(15,159,131,.28),transparent_34%),radial-gradient(circle_at_88%_82%,rgba(21,107,133,.42),transparent_34%)]" />
+        <div className="absolute -left-28 bottom-8 -z-10 h-72 w-72 rounded-full border-[56px] border-white/[.035]" />
+        <div className="absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-mint/10 blur-3xl" />
+
+        <div className="container-page grid items-center gap-12 py-12 sm:py-16 lg:min-h-[720px] lg:grid-cols-[.92fr_1.08fr] lg:gap-16 lg:py-20">
+          <div className="relative z-10 max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-bold text-emerald-100 backdrop-blur-sm">
+              <MapPin size={16} /> Atención en Lima Metropolitana
             </span>
-            <h1 className="mt-7 max-w-3xl text-balance text-4xl font-black leading-[1.08] tracking-[-0.035em] text-ink sm:text-6xl lg:text-[4.25rem]">
-              Atención médica cercana, humana y confiable.
+
+            <h1 className="mt-7 text-balance text-[2.65rem] font-black leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4.5rem]">
+              Tu salud, más cerca de <span className="text-emerald-300">ti.</span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-              Conectamos pacientes con médicos verificados para recibir una consulta virtual o
-              atención a domicilio, con la libertad de elegir cómo y cuándo atenderse.
+
+            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-200 sm:text-xl">
+              Encuentra médicos verificados y elige la atención que necesitas: consulta virtual o
+              atención a domicilio, en el horario que mejor se adapte a ti.
             </p>
+
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link className="btn-primary min-h-12 px-6" href="/medicos">
-                <Search size={19} /> Encontrar un médico
+              <Link
+                className="btn-primary min-h-12 w-full px-6 shadow-[0_14px_35px_rgba(15,159,131,.28)] sm:w-auto"
+                href="/medicos"
+              >
+                <Search size={19} /> Buscar un médico
               </Link>
-              <Link className="btn-secondary min-h-12 px-6" href="/#como-funciona">
-                Conocer cómo funciona <ArrowRight size={18} />
+              <Link
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 font-bold text-white transition hover:border-white/45 hover:bg-white/15 sm:w-auto"
+                href="/#como-funciona"
+              >
+                Cómo funciona <ArrowRight size={18} />
               </Link>
             </div>
-            <p className="mt-6 flex items-center gap-2 text-sm font-semibold text-slate-500">
-              <Check className="rounded-full bg-emerald-100 p-0.5 text-mint" size={19} />
-              Tú eliges al profesional, la modalidad y el horario.
-            </p>
+
+            <div className="mt-8 grid max-w-lg grid-cols-2 gap-3 border-t border-white/10 pt-6 text-sm sm:flex sm:gap-7">
+              <p className="flex items-center gap-2 font-semibold text-slate-200">
+                <BadgeCheck className="shrink-0 text-emerald-300" size={20} /> Perfiles verificados
+              </p>
+              <p className="flex items-center gap-2 font-semibold text-slate-200">
+                <CalendarCheck className="shrink-0 text-emerald-300" size={20} /> Horarios visibles
+              </p>
+            </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[520px] lg:justify-self-end">
-            <div className="absolute -left-5 -top-5 h-24 w-24 rounded-3xl border border-white/80 bg-white/50 backdrop-blur" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white bg-white p-5 shadow-[0_30px_90px_rgba(21,107,133,.16)] sm:p-7">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-5">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[.18em] text-mint">
-                    Tu próxima atención
+          <div className="relative mx-auto w-full max-w-[620px] lg:justify-self-end">
+            <div className="absolute -inset-4 rounded-[2.5rem] border border-white/10 bg-white/[.035] sm:-inset-5" />
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-white/20 bg-slate-800 shadow-[0_36px_100px_rgba(4,20,33,.45)] sm:rounded-[2.25rem]">
+              <Image
+                alt="Médica atendiendo con cercanía a una madre y su hija en casa"
+                className="object-cover"
+                fill
+                preload
+                sizes="(max-width: 1023px) calc(100vw - 1.25rem), 52vw"
+                src="/images/hero-care-lima-v1.png"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent" />
+
+              <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full border border-white/50 bg-white/90 px-3 py-2 text-xs font-black text-ink shadow-lg backdrop-blur sm:left-5 sm:top-5 sm:px-4 sm:text-sm">
+                <BadgeCheck className="text-mint" size={18} /> Atención de confianza
+              </div>
+
+              <div className="absolute inset-x-3 bottom-3 grid grid-cols-2 gap-2 rounded-2xl border border-white/20 bg-ink/75 p-2.5 backdrop-blur-md sm:inset-x-5 sm:bottom-5 sm:gap-3 sm:p-3">
+                <div className="flex min-w-0 items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2.5 sm:gap-3 sm:px-3">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sky-300/15 text-sky-200 sm:h-9 sm:w-9">
+                    <Laptop size={18} />
+                  </span>
+                  <p className="text-xs font-black leading-tight sm:text-sm">Consulta virtual</p>
+                </div>
+                <div className="flex min-w-0 items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2.5 sm:gap-3 sm:px-3">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-emerald-300/15 text-emerald-200 sm:h-9 sm:w-9">
+                    <House size={18} />
+                  </span>
+                  <p className="text-xs font-black leading-tight sm:text-sm">
+                    Atención a domicilio
                   </p>
-                  <h2 className="mt-2 text-xl font-black text-ink">Elige cómo cuidarte hoy</h2>
                 </div>
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-cloud text-ocean">
-                  <Stethoscope size={25} />
-                </span>
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-sky-100 bg-sky-50/80 p-5">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-ocean shadow-sm">
-                    <Laptop size={23} />
-                  </span>
-                  <h3 className="mt-5 font-black">Consulta virtual</h3>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Desde donde estés.</p>
-                </div>
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-5">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-mint shadow-sm">
-                    <House size={23} />
-                  </span>
-                  <h3 className="mt-5 font-black">A domicilio</h3>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">El médico va hacia ti.</p>
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-slate-100 p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-100 text-mint">
-                      <CalendarCheck size={20} />
-                    </span>
-                    <div>
-                      <p className="text-sm font-bold">Disponibilidad real</p>
-                      <p className="text-xs text-slate-500">Publicada por cada profesional</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-slate-400" size={20} />
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-center gap-3 rounded-2xl bg-ink px-5 py-4 text-white">
-                <BadgeCheck className="shrink-0 text-emerald-300" size={23} />
-                <p className="text-sm font-semibold">Profesionales con identidad y perfil verificados</p>
               </div>
             </div>
-            <div className="absolute -bottom-5 -right-5 -z-10 h-40 w-40 rounded-full bg-mint/20 blur-2xl" />
+
+            <div className="absolute -bottom-6 -right-6 -z-10 h-40 w-40 rounded-full bg-mint/25 blur-3xl" />
           </div>
         </div>
       </section>
