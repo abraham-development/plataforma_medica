@@ -2,7 +2,7 @@
 
 ## Producto y arquitectura actual
 
-MediCerca es un MVP de atención médica para Lima Metropolitana. Conecta pacientes y médicos mediante dos modalidades exactas:
+MediCerca es un MVP de atención médica para Lima y Callao. Conecta pacientes y médicos mediante dos modalidades exactas:
 
 - `VIRTUAL`: consulta virtual.
 - `HOME_VISIT`: atención a domicilio.
@@ -17,6 +17,23 @@ Es un monorepo administrado con pnpm y Turborepo:
 
 El producto es uno, pero Next.js y NestJS son dos procesos desplegables. No describir esta arquitectura como microservicios: el backend sigue siendo una API modular única.
 
+## Alcance de estas instrucciones
+
+- Este archivo rige todo el repositorio.
+- `apps/web/AGENTS.md` agrega reglas específicas para Next.js, autenticación SSR, navegación por rol, responsive y despliegue web.
+- `apps/api/AGENTS.md` agrega reglas específicas para NestJS, endpoints, autorización, InsForge y build del backend.
+- Al trabajar dentro de una aplicación, aplicar este archivo y el `AGENTS.md` más cercano. Si una indicación local es más específica, tiene precedencia para ese ámbito.
+- No editar artefactos generados en `.next`, `dist`, `.turbo`, `coverage` o `node_modules`.
+
+## Fuentes de verdad
+
+- `recursos_internos/roles.md`: capacidades y restricciones por rol.
+- `migrations/`: esquema, enums, RPC, restricciones y políticas RLS vigentes.
+- `packages/api-client/src/index.ts`: contratos TypeScript compartidos entre aplicaciones; mantenerlos alineados con la API y las migraciones.
+- `insforge.toml`: configuración versionada de autenticación de InsForge.
+- `.env.example`: nombres y separación de variables, nunca valores reales.
+- `docs/architecture.md` y `docs/operations.md`: arquitectura y operación detalladas; actualizar la documentación afectada cuando cambie una decisión transversal.
+
 ## Reglas funcionales que deben conservarse
 
 - El registro permite únicamente `PATIENT` y `DOCTOR`, exige verificación OTP por correo y completa el rol solo después de verificar la cuenta.
@@ -24,16 +41,25 @@ El producto es uno, pero Next.js y NestJS son dos procesos desplegables. No desc
 - Pacientes: pueden buscar médicos, revisar especialidades y reservar según la disponibilidad publicada.
 - Médicos: tienen un espacio propio con `Resumen`, `Perfil profesional`, `Agenda` y `Disponibilidad`. No deben ver el menú público para buscar médicos ni reservar citas.
 - La disponibilidad médica usa fechas concretas, bloques de 30 minutos, zona horaria `America/Lima` y únicamente modalidades habilitadas en el perfil profesional.
-- Los roles y permisos funcionales se basan en `recursos_internos/roles.md`.
+- El horizonte de disponibilidad y reserva es de 60 días; una reserva debe ser atómica y no puede producir doble ocupación del médico o paciente.
+- Los estados de cita del esquema son `PENDING`, `CONFIRMED`, `CANCELLED`, `COMPLETED` y `NO_SHOW`. Mantener migraciones, API, cliente compartido e interfaz sincronizados cuando cambien.
+- La atención a domicilio exige un distrito cubierto de Lima o Callao, dirección y referencia.
+- Un paciente puede cancelar hasta 2 horas antes; médicos y administradores registran resultados según los permisos definidos.
+- Los perfiles, imágenes, reseñas y horarios locales de demostración deben identificarse como ficticios y nunca mezclarse con datos reales recuperados de InsForge.
 
 ## Desarrollo local
+
+El toolchain versionado usa Node.js `24.x` y pnpm `11.21.0` mediante Corepack. Respetar el campo `packageManager` de la raíz y el lockfile; no fijar otra versión en scripts o CI.
 
 Ejecutar desde la raíz:
 
 ```bash
 corepack pnpm install
+cp .env.example .env.local
 corepack pnpm dev
 ```
+
+Completar `.env.local` con valores propios sin copiar secretos a archivos versionados. El comando raíz carga ese archivo y Turbo entrega a cada proceso solo las variables declaradas para su tarea.
 
 Puertos locales:
 
@@ -43,6 +69,8 @@ Puertos locales:
 - Swagger: `http://localhost:4000/api/docs`.
 
 El script `predev` prepara un shim local de pnpm mediante Corepack cuando Turbo lo necesita en desarrollo. No agregar un `postinstall` que ejecute `corepack enable`: los entornos administrados de Hostinger ya proporcionan pnpm y bloquean la creación manual de ese enlace durante la instalación. No recomendar `npm run dev -- --port 3000` para este monorepo.
+
+El lockfile principal del monorepo es `pnpm-lock.yaml`. `apps/web/package-lock.json` se conserva deliberadamente para la instalación npm de la Web App administrada en Hostinger; si cambian dependencias de `apps/web`, mantener ambos lockfiles coherentes y no convertir el resto del repositorio a npm.
 
 ## Variables de entorno
 
@@ -91,9 +119,12 @@ corepack pnpm typecheck
 corepack pnpm test
 ```
 
-Para cambios que afecten producción, ejecutar también `corepack pnpm build`. No modificar archivos generados en `.next`, `dist`, `.turbo` o `node_modules`.
+Para cambios que afecten producción, ejecutar también `corepack pnpm build`. Para flujos críticos o cambios visuales/responsive de la web, ejecutar `corepack pnpm test:e2e`; Playwright cubre como mínimo anchos de 320, 768 y 1440 px. La CI usa instalación congelada, typecheck, builds, pruebas de API y E2E, por lo que los lockfiles deben quedar actualizados.
+
+Si una verificación no puede ejecutarse por dependencias o servicios externos, indicarlo expresamente al entregar; no presentar una comprobación no ejecutada como exitosa.
 
 <!-- INSFORGE:START -->
+
 ## InsForge backend
 
 This project uses [InsForge](https://insforge.dev): an all-in-one, open-source Postgres-based backend (BaaS) that gives this app a database, authentication, file storage, edge functions, realtime, an AI model gateway, and payments through one platform.

@@ -1,6 +1,10 @@
 export default function PageLoading() {
   return (
-    <section className="container-page py-8 sm:py-12" aria-label="Cargando contenido" aria-live="polite">
+    <section
+      className="container-page py-8 sm:py-12"
+      aria-label="Cargando contenido"
+      aria-live="polite"
+    >
       <div className="animate-pulse">
         <div className="h-5 w-40 rounded-full bg-emerald-100" />
         <div className="mt-5 h-9 w-full max-w-xl rounded-xl bg-slate-200 sm:h-12" />

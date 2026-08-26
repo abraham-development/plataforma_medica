@@ -55,14 +55,16 @@ export class AppointmentsController {
     if (req.user.roles.includes('DOCTOR')) {
       throw new ForbiddenException('Las cuentas médicas no pueden reservar citas')
     }
-    const result = await this.insforge.forUser(req.accessToken).database.rpc('book_appointment_v2', {
-      requested_doctor: body.doctorId,
-      requested_start: body.startsAt,
-      requested_mode: body.consultationMode,
-      requested_district: body.districtId ?? null,
-      requested_address: body.address ?? null,
-      requested_reference: body.addressReference ?? null,
-    })
+    const result = await this.insforge
+      .forUser(req.accessToken)
+      .database.rpc('book_appointment_v2', {
+        requested_doctor: body.doctorId,
+        requested_start: body.startsAt,
+        requested_mode: body.consultationMode,
+        requested_district: body.districtId ?? null,
+        requested_address: body.address ?? null,
+        requested_reference: body.addressReference ?? null,
+      })
     return this.insforge.unwrap(result, 'APPOINTMENT_SLOT_UNAVAILABLE')
   }
   @Roles('PATIENT', 'DOCTOR', 'ADMIN') @Get('me') async mine(@Req() req: AuthenticatedRequest) {

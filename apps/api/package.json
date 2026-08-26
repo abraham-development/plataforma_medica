@@ -18,11 +18,11 @@
   "dependencies": {
     "@insforge/sdk": "1.5.2",
     "@insforge/shared-schemas": "1.2.1",
-    "@nestjs/common": "11.1.6",
-    "@nestjs/config": "4.0.2",
-    "@nestjs/core": "11.1.6",
-    "@nestjs/platform-express": "11.1.6",
-    "@nestjs/swagger": "11.2.0",
+    "@nestjs/common": "11.2.3",
+    "@nestjs/config": "4.0.4",
+    "@nestjs/core": "11.2.3",
+    "@nestjs/platform-express": "11.2.3",
+    "@nestjs/swagger": "11.4.7",
     "@nestjs/throttler": "6.4.0",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
@@ -31,8 +31,8 @@
     "rxjs": "7.8.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "11.0.10",
-    "@nestjs/testing": "11.1.6",
+    "@nestjs/cli": "11.0.24",
+    "@nestjs/testing": "11.2.3",
     "@types/express": "5.0.3",
     "@types/jest": "30.0.0",
     "@types/node": "24.3.0",

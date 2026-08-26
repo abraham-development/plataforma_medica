@@ -2,14 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  House,
-  Laptop,
-  LoaderCircle,
-} from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, House, Laptop, LoaderCircle } from 'lucide-react'
+import { authenticatedApiFetch, handleSessionError } from '@/lib/insforge/authenticated-fetch'
 
 type ConsultationMode = 'VIRTUAL' | 'HOME_VISIT'
 type AvailabilitySlot = {
@@ -68,14 +62,6 @@ const selectableTimes = Array.from({ length: 28 }, (_, index) => {
   return { start: timeLabel(startMinutes), end: timeLabel(startMinutes + 30) }
 })
 
-function accessToken() {
-  const rawToken = document.cookie
-    .split('; ')
-    .find((item) => item.startsWith('insforge_access_token='))
-    ?.split('=')[1]
-  return decodeURIComponent(rawToken ?? '')
-}
-
 export function AvailabilityForm() {
   const today = useMemo(() => limaDateKey(), [])
   const lastSelectableDay = useMemo(() => addDays(today, 60), [today])
@@ -94,18 +80,14 @@ export function AvailabilityForm() {
   const [noticeKind, setNoticeKind] = useState<'success' | 'error'>('success')
 
   useEffect(() => {
-    const token = accessToken()
     async function load() {
       try {
         const [availabilityResponse, profileResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/doctors/me/availability`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/me/doctor-profile`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          authenticatedApiFetch('/doctors/me/availability'),
+          authenticatedApiFetch('/me/doctor-profile'),
         ])
         if (!availabilityResponse.ok) throw new Error('No pudimos cargar tu disponibilidad.')
+        if (!profileResponse.ok) throw new Error('No pudimos cargar tus modalidades de atención.')
         const records = (await availabilityResponse.json()) as AvailabilityRecord[]
         setItems(
           records.map((record) => ({
@@ -125,13 +107,13 @@ export function AvailabilityForm() {
           if (profile.offers_home_visit) modes.push('HOME_VISIT')
           setAllowedModes(modes)
           setSelectedMode(modes[0] ?? null)
-          setItems((current) =>
-            current.filter((item) => modes.includes(item.consultationMode)),
-          )
+          setItems((current) => current.filter((item) => modes.includes(item.consultationMode)))
         }
       } catch (error) {
-        setNotice(error instanceof Error ? error.message : 'No pudimos cargar tu disponibilidad.')
-        setNoticeKind('error')
+        if (!handleSessionError(error)) {
+          setNotice(error instanceof Error ? error.message : 'No pudimos cargar tu disponibilidad.')
+          setNoticeKind('error')
+        }
       } finally {
         setLoading(false)
       }
@@ -141,19 +123,17 @@ export function AvailabilityForm() {
 
   const daysInMonth = new Date(visibleMonth.year, visibleMonth.month + 1, 0).getDate()
   const leadingBlankDays = (new Date(visibleMonth.year, visibleMonth.month, 1).getDay() + 6) % 7
-  const calendarCells = Array.from(
-    { length: leadingBlankDays + daysInMonth },
-    (_, index) => (index < leadingBlankDays ? null : index - leadingBlankDays + 1),
+  const calendarCells = Array.from({ length: leadingBlankDays + daysInMonth }, (_, index) =>
+    index < leadingBlankDays ? null : index - leadingBlankDays + 1,
   )
   const selectedDateValue = dateFromKey(selectedDate)
   const currentMonthStart = today.slice(0, 7)
   const visibleMonthKey = keyFromParts(visibleMonth.year, visibleMonth.month, 1).slice(0, 7)
   const nextMonthDate = new Date(visibleMonth.year, visibleMonth.month + 1, 1)
-  const nextMonthKey = keyFromParts(
-    nextMonthDate.getFullYear(),
-    nextMonthDate.getMonth(),
-    1,
-  ).slice(0, 7)
+  const nextMonthKey = keyFromParts(nextMonthDate.getFullYear(), nextMonthDate.getMonth(), 1).slice(
+    0,
+    7,
+  )
   const lastMonthKey = lastSelectableDay.slice(0, 7)
 
   function moveMonth(amount: number) {
@@ -199,7 +179,9 @@ export function AvailabilityForm() {
 
   async function save() {
     if (!allowedModes.length) {
-      setNotice('Activa al menos una modalidad en tu perfil profesional antes de publicar horarios.')
+      setNotice(
+        'Activa al menos una modalidad en tu perfil profesional antes de publicar horarios.',
+      )
       setNoticeKind('error')
       return
     }
@@ -211,11 +193,10 @@ export function AvailabilityForm() {
       ),
     )
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doctors/me/availability`, {
+      const response = await authenticatedApiFetch('/doctors/me/availability', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken()}`,
         },
         body: JSON.stringify({ items: sortedItems }),
       })
@@ -229,8 +210,10 @@ export function AvailabilityForm() {
       setNotice('Disponibilidad guardada. Los pacientes ya podrán ver estos horarios.')
       setNoticeKind('success')
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'No pudimos guardar la disponibilidad.')
-      setNoticeKind('error')
+      if (!handleSessionError(error)) {
+        setNotice(error instanceof Error ? error.message : 'No pudimos guardar la disponibilidad.')
+        setNoticeKind('error')
+      }
     } finally {
       setSaving(false)
     }
@@ -276,7 +259,10 @@ export function AvailabilityForm() {
 
           <div className="mt-7 grid grid-cols-7 gap-1 text-center sm:gap-2">
             {weekDays.map((day) => (
-              <span className="pb-2 text-xs font-bold uppercase tracking-wide text-slate-400" key={day}>
+              <span
+                className="pb-2 text-xs font-bold uppercase tracking-wide text-slate-400"
+                key={day}
+              >
                 {day}
               </span>
             ))}
@@ -342,39 +328,44 @@ export function AvailabilityForm() {
             {allowedModes.length === 0 && !loading ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <p className="font-bold">Aún no tienes modalidades activas.</p>
-                <p className="mt-1">Activa consulta virtual o atención a domicilio para publicar horarios.</p>
-                <Link className="mt-3 inline-flex font-bold text-ocean underline" href="/medico/perfil">
+                <p className="mt-1">
+                  Activa consulta virtual o atención a domicilio para publicar horarios.
+                </p>
+                <Link
+                  className="mt-3 inline-flex font-bold text-ocean underline"
+                  href="/medico/perfil"
+                >
                   Ir a Perfil profesional
                 </Link>
               </div>
             ) : (
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              {allowedModes.includes('VIRTUAL') && (
-                <button
-                  className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-bold ${
-                    selectedMode === 'VIRTUAL'
-                      ? 'border-ocean bg-sky-50 text-ocean'
-                      : 'border-slate-200 bg-white'
-                  }`}
-                  onClick={() => setSelectedMode('VIRTUAL')}
-                  type="button"
-                >
-                  <Laptop size={18} /> Consulta virtual
-                </button>
-              )}
-              {allowedModes.includes('HOME_VISIT') && (
-                <button
-                  className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-bold ${
-                    selectedMode === 'HOME_VISIT'
-                      ? 'border-mint bg-emerald-50 text-mint'
-                      : 'border-slate-200 bg-white'
-                  }`}
-                  onClick={() => setSelectedMode('HOME_VISIT')}
-                  type="button"
-                >
-                  <House size={18} /> A domicilio
-                </button>
-              )}
+                {allowedModes.includes('VIRTUAL') && (
+                  <button
+                    className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-bold ${
+                      selectedMode === 'VIRTUAL'
+                        ? 'border-ocean bg-sky-50 text-ocean'
+                        : 'border-slate-200 bg-white'
+                    }`}
+                    onClick={() => setSelectedMode('VIRTUAL')}
+                    type="button"
+                  >
+                    <Laptop size={18} /> Consulta virtual
+                  </button>
+                )}
+                {allowedModes.includes('HOME_VISIT') && (
+                  <button
+                    className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-bold ${
+                      selectedMode === 'HOME_VISIT'
+                        ? 'border-mint bg-emerald-50 text-mint'
+                        : 'border-slate-200 bg-white'
+                    }`}
+                    onClick={() => setSelectedMode('HOME_VISIT')}
+                    type="button"
+                  >
+                    <House size={18} /> A domicilio
+                  </button>
+                )}
               </div>
             )}
           </fieldset>
@@ -383,7 +374,11 @@ export function AvailabilityForm() {
             <div className="flex items-center justify-between gap-3">
               <p className="label !mb-0">Selecciona bloques de 30 minutos</p>
               {selectedModeSlots.length > 0 && (
-                <button className="text-xs font-bold text-coral" onClick={clearSelectedDay} type="button">
+                <button
+                  className="text-xs font-bold text-coral"
+                  onClick={clearSelectedDay}
+                  type="button"
+                >
                   Limpiar
                 </button>
               )}
@@ -428,7 +423,9 @@ export function AvailabilityForm() {
             {items.length} {items.length === 1 ? 'horario' : 'horarios'} en {configuredDates}{' '}
             {configuredDates === 1 ? 'día' : 'días'}
           </p>
-          <p className="text-sm text-slate-500">Guarda para publicar los cambios a los pacientes.</p>
+          <p className="text-sm text-slate-500">
+            Guarda para publicar los cambios a los pacientes.
+          </p>
         </div>
         <button
           className="btn-primary sm:min-w-56 disabled:cursor-not-allowed disabled:opacity-50"

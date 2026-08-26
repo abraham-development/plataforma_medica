@@ -18,12 +18,7 @@ import {
 } from 'lucide-react'
 import { BookingForm } from '@/components/booking-form'
 import { DemoBookingPanel } from '@/components/demo-booking-panel'
-import {
-  getDemoAvailableSlots,
-  getDemoDoctor,
-  type PatientReview,
-} from '@/lib/demo-doctors'
-
+import { getDemoAvailableSlots, getDemoDoctor, type PatientReview } from '@/lib/demo-doctors'
 
 function limaDateKey(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -204,7 +199,10 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
 
   return (
     <section className="container-page py-10 sm:py-14">
-      <Link className="inline-flex items-center gap-2 text-sm font-black text-ocean" href="/medicos">
+      <Link
+        className="inline-flex items-center gap-2 text-sm font-black text-ocean"
+        href="/medicos"
+      >
         <ArrowLeft size={17} /> Volver a buscar médicos
       </Link>
 
@@ -252,7 +250,9 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
                   <div className="rounded-2xl bg-cloud p-4">
                     <Award className="text-ocean" size={20} />
                     <p className="mt-2 font-black">
-                      {profile.years_experience ? `${profile.years_experience} años` : 'Profesional'}
+                      {profile.years_experience
+                        ? `${profile.years_experience} años`
+                        : 'Profesional'}
                     </p>
                     <p className="text-xs text-slate-500">Experiencia</p>
                   </div>
@@ -262,7 +262,9 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
                       {profile.rating ? `${profile.rating.toFixed(1)} / 5` : 'Sin reseñas aún'}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {profile.review_count ? `${profile.review_count} valoraciones` : 'Nuevo perfil'}
+                      {profile.review_count
+                        ? `${profile.review_count} valoraciones`
+                        : 'Nuevo perfil'}
                     </p>
                   </div>
                 </div>
@@ -279,7 +281,10 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
                 <h3 className="mt-8 font-black">Áreas en las que puede ayudarte</h3>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {profile.focus_areas.map((area) => (
-                    <span className="rounded-full bg-emerald-50 px-3 py-2 text-sm font-bold text-mint" key={area}>
+                    <span
+                      className="rounded-full bg-emerald-50 px-3 py-2 text-sm font-bold text-mint"
+                      key={area}
+                    >
                       {area}
                     </span>
                   ))}
@@ -295,7 +300,9 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
                   </h3>
                   <ul className="mt-3 grid gap-3 text-sm leading-6 text-slate-600">
                     {profile.education.map((item) => (
-                      <li className="border-l-2 border-sky-100 pl-3" key={item}>{item}</li>
+                      <li className="border-l-2 border-sky-100 pl-3" key={item}>
+                        {item}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -323,7 +330,9 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5 text-mint">
                   <House size={24} />
                   <h3 className="mt-4 font-black">Atención a domicilio</h3>
-                  <p className="mt-1 text-sm text-slate-600">El profesional se acerca a tu hogar.</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    El profesional se acerca a tu hogar.
+                  </p>
                 </div>
               )}
             </div>
@@ -353,12 +362,22 @@ export default async function DoctorPage({ params }: { params: Promise<{ id: str
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {profile.reviews.map((review) => (
-                  <blockquote className="rounded-2xl border border-slate-100 bg-cloud p-5" key={`${review.author}-${review.dateLabel}`}>
+                  <blockquote
+                    className="rounded-2xl border border-slate-100 bg-cloud p-5"
+                    key={`${review.author}-${review.dateLabel}`}
+                  >
                     <MessageSquareQuote className="text-mint" size={22} />
-                    <div className="mt-3 flex gap-0.5" aria-label={`${review.rating} de 5 estrellas`}>
+                    <div
+                      className="mt-3 flex gap-0.5"
+                      aria-label={`${review.rating} de 5 estrellas`}
+                    >
                       {Array.from({ length: 5 }).map((_, index) => (
                         <Star
-                          className={index < review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}
+                          className={
+                            index < review.rating
+                              ? 'fill-amber-400 text-amber-400'
+                              : 'text-slate-300'
+                          }
                           key={index}
                           size={15}
                         />

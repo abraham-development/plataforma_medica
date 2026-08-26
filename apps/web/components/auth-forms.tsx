@@ -173,15 +173,15 @@ export function RegisterForm() {
   )
 }
 
-export function LoginForm() {
+export function LoginForm({ nextPath = '/panel' }: { nextPath?: string }) {
   const router = useRouter()
   const [state, action, pending] = useActionState(signIn, initial)
   useEffect(() => {
     if (state.ok) {
       window.dispatchEvent(new Event('medicerca:auth-changed'))
-      router.push('/panel')
+      router.push(nextPath)
     }
-  }, [state.ok, router])
+  }, [nextPath, state.ok, router])
   return (
     <form action={action} className="grid gap-5">
       <div>

@@ -6,14 +6,14 @@ packages:
 # exact versions were already reviewed and locked before the runtime upgrade;
 # keep every other package covered by the default supply-chain protection.
 minimumReleaseAgeExclude:
-  - "@posthog/core@1.48.0"
-  - "@posthog/types@1.403.1"
-  - "baseline-browser-mapping@2.11.14"
-  - "posthog-node@5.49.0"
+  - '@posthog/core@1.48.0'
+  - '@posthog/types@1.403.1'
+  - 'baseline-browser-mapping@2.11.14'
+  - 'posthog-node@5.49.0'
 
 # Review dependency install scripts explicitly. Scarf is telemetry-only and is
 # intentionally denied; NestJS and the native resolver are required at build.
 allowBuilds:
-  "@nestjs/core@11.1.6": true
-  "@scarf/scarf@1.4.0": false
-  "unrs-resolver@1.12.2": true
+  '@nestjs/core@11.2.3': true
+  '@scarf/scarf@1.4.0': false
+  'unrs-resolver@1.12.2': true

@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { House, Laptop, LoaderCircle } from 'lucide-react'
-import { insforge } from '@/lib/insforge/client'
+import { authenticatedApiFetch, handleSessionError } from '@/lib/insforge/authenticated-fetch'
 
 type District = { id: string; name: string; province: string }
 type ConsultationMode = 'VIRTUAL' | 'HOME_VISIT'
@@ -71,9 +71,7 @@ export function BookingForm({
     setSelectedStart(modeSlots.find((slot) => dateKey(slot.startsAt) === firstDate)?.startsAt ?? '')
   }, [availableDates, modeSlots])
 
-  const slotsForSelectedDate = modeSlots.filter(
-    (slot) => dateKey(slot.startsAt) === selectedDate,
-  )
+  const slotsForSelectedDate = modeSlots.filter((slot) => dateKey(slot.startsAt) === selectedDate)
 
   function chooseDate(value: string) {
     setSelectedDate(value)
@@ -89,42 +87,40 @@ export function BookingForm({
     setPending(true)
     setNotice('')
     const form = new FormData(event.currentTarget)
-    const { data } = await insforge.auth.getCurrentUser()
-    if (!data.user) {
-      router.push('/login')
-      return
+    try {
+      const response = await authenticatedApiFetch('/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          doctorId,
+          startsAt: selectedStart,
+          consultationMode: mode,
+          ...(mode === 'HOME_VISIT'
+            ? {
+                districtId: form.get('districtId'),
+                address: form.get('address'),
+                addressReference: form.get('addressReference'),
+              }
+            : {}),
+        }),
+      })
+      const result = (await response.json()) as { message?: string | string[] }
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(result.message)
+            ? result.message.join(', ')
+            : (result.message ?? 'No pudimos reservar ese horario.'),
+        )
+      }
+      setNotice('¡Cita confirmada! Ya aparece en tu panel.')
+      setTimeout(() => router.push('/paciente/citas'), 900)
+    } catch (error) {
+      if (!handleSessionError(error)) {
+        setNotice(error instanceof Error ? error.message : 'No pudimos reservar ese horario.')
+      }
+    } finally {
+      setPending(false)
     }
-    const token = document.cookie
-      .split('; ')
-      .find((item) => item.startsWith('insforge_access_token='))
-      ?.split('=')[1]
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${decodeURIComponent(token ?? '')}`,
-      },
-      body: JSON.stringify({
-        doctorId,
-        startsAt: selectedStart,
-        consultationMode: mode,
-        ...(mode === 'HOME_VISIT'
-          ? {
-              districtId: form.get('districtId'),
-              address: form.get('address'),
-              addressReference: form.get('addressReference'),
-            }
-          : {}),
-      }),
-    })
-    const result = (await response.json()) as { message?: string }
-    setPending(false)
-    if (!response.ok) {
-      setNotice(result.message ?? 'No pudimos reservar ese horario.')
-      return
-    }
-    setNotice('¡Cita confirmada! Ya aparece en tu panel.')
-    setTimeout(() => router.push('/paciente/citas'), 900)
   }
   return (
     <form onSubmit={submit} className="card grid gap-5 p-4 sm:p-6">

@@ -113,8 +113,7 @@ export function DoctorSearch({
         const fullName = `${doctor.first_name} ${doctor.last_name}`.toLowerCase()
         const matchesName = fullName.includes(doctorTerm.trim().toLowerCase())
         const matchesMode =
-          mode === 'ALL' ||
-          (mode === 'VIRTUAL' ? doctor.offers_virtual : doctor.offers_home_visit)
+          mode === 'ALL' || (mode === 'VIRTUAL' ? doctor.offers_virtual : doctor.offers_home_visit)
         return matchesSpecialty && matchesName && matchesMode
       }),
     [doctors, doctorTerm, mode, selectedSpecialty],
@@ -138,7 +137,10 @@ export function DoctorSearch({
 
   return (
     <div className="mt-9">
-      <div className="mb-8 flex items-center gap-3 text-sm font-bold" aria-label="Progreso de búsqueda">
+      <div
+        className="mb-8 flex items-center gap-3 text-sm font-bold"
+        aria-label="Progreso de búsqueda"
+      >
         <span
           className={`grid h-8 w-8 place-items-center rounded-full ${
             selectedSpecialty ? 'bg-emerald-100 text-mint' : 'bg-mint text-white'
@@ -161,9 +163,7 @@ export function DoctorSearch({
       {!selectedSpecialty ? (
         <>
           <div className="max-w-2xl">
-            <p className="text-sm font-black uppercase tracking-[.16em] text-mint">
-              Paso 1 de 2
-            </p>
+            <p className="text-sm font-black uppercase tracking-[.16em] text-mint">Paso 1 de 2</p>
             <h2 className="mt-3 text-balance text-3xl font-black sm:text-4xl">
               ¿Qué tipo de atención necesitas?
             </h2>
@@ -209,7 +209,8 @@ export function DoctorSearch({
                   <p className="relative mt-2 leading-7 text-slate-600">{specialty.description}</p>
                   <p className="relative mt-4 text-sm text-slate-500">{specialty.prompt}</p>
                   <span className="relative mt-6 inline-flex items-center gap-2 font-black text-ocean">
-                    Ver médicos <ChevronRight className="transition group-hover:translate-x-1" size={18} />
+                    Ver médicos{' '}
+                    <ChevronRight className="transition group-hover:translate-x-1" size={18} />
                   </span>
                 </button>
               )
@@ -253,7 +254,10 @@ export function DoctorSearch({
           <div className="card mt-7 grid gap-4 p-4 md:grid-cols-[1fr_auto]">
             <label className="relative">
               <span className="sr-only">Buscar médico por nombre</span>
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={19}
+              />
               <input
                 className="field !pl-11"
                 value={doctorTerm}

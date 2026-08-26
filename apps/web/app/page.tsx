@@ -199,13 +199,15 @@ export default function HomePage() {
       <section className="container-page py-20 sm:py-24">
         <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div className="max-w-3xl">
-            <p className="font-black uppercase tracking-[.18em] text-mint">Empieza por tu necesidad</p>
+            <p className="font-black uppercase tracking-[.18em] text-mint">
+              Empieza por tu necesidad
+            </p>
             <h2 className="mt-4 text-balance text-3xl font-black sm:text-5xl">
               Elige una especialidad y conoce a sus profesionales.
             </h2>
             <p className="mt-5 text-lg leading-8 text-slate-600">
-              Buscar médicos y explorar especialidades ahora es un solo recorrido: primero eliges
-              la atención que necesitas y después comparas perfiles, experiencia y horarios.
+              Buscar médicos y explorar especialidades ahora es un solo recorrido: primero eliges la
+              atención que necesitas y después comparas perfiles, experiencia y horarios.
             </p>
           </div>
           <Link className="inline-flex items-center gap-2 font-black text-ocean" href="/medicos">
@@ -298,7 +300,9 @@ export default function HomePage() {
       <section className="bg-cloud py-20 sm:py-28">
         <div className="container-page">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-black uppercase tracking-[.18em] text-mint">Dos formas de atenderte</p>
+            <p className="font-black uppercase tracking-[.18em] text-mint">
+              Dos formas de atenderte
+            </p>
             <h2 className="mt-4 text-balance text-3xl font-black sm:text-5xl">
               La atención se adapta a tu realidad.
             </h2>
@@ -322,8 +326,12 @@ export default function HomePage() {
                 espacio cómodo para ti.
               </p>
               <ul className="mt-7 grid gap-3 text-sm font-semibold text-slate-700">
-                <li className="flex items-center gap-2"><Check className="text-ocean" size={18} /> Evita desplazamientos innecesarios</li>
-                <li className="flex items-center gap-2"><Check className="text-ocean" size={18} /> Elige entre horarios disponibles</li>
+                <li className="flex items-center gap-2">
+                  <Check className="text-ocean" size={18} /> Evita desplazamientos innecesarios
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="text-ocean" size={18} /> Elige entre horarios disponibles
+                </li>
               </ul>
             </article>
 
@@ -342,8 +350,12 @@ export default function HomePage() {
                 para tu bienestar.
               </p>
               <ul className="mt-7 grid gap-3 text-sm font-semibold text-slate-700">
-                <li className="flex items-center gap-2"><Check className="text-mint" size={18} /> Indica tu distrito y dirección</li>
-                <li className="flex items-center gap-2"><Check className="text-mint" size={18} /> Revisa la cobertura del profesional</li>
+                <li className="flex items-center gap-2">
+                  <Check className="text-mint" size={18} /> Indica tu distrito y dirección
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="text-mint" size={18} /> Revisa la cobertura del profesional
+                </li>
               </ul>
             </article>
           </div>
@@ -362,9 +374,13 @@ export default function HomePage() {
               </h2>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
                 Empezamos cerca: conectando pacientes y profesionales en todos los distritos de Lima
-                Metropolitana, con una experiencia diseñada para responder a la dinámica de la ciudad.
+                Metropolitana, con una experiencia diseñada para responder a la dinámica de la
+                ciudad.
               </p>
-              <Link className="mt-8 inline-flex items-center gap-2 font-black text-ocean" href="/medicos">
+              <Link
+                className="mt-8 inline-flex items-center gap-2 font-black text-ocean"
+                href="/medicos"
+              >
                 Ver médicos disponibles <ArrowRight size={18} />
               </Link>
             </div>
@@ -389,14 +405,19 @@ export default function HomePage() {
       <section id="como-funciona" className="scroll-mt-36 bg-ink py-20 text-white sm:py-28">
         <div className="container-page">
           <div className="max-w-3xl">
-            <p className="font-black uppercase tracking-[.18em] text-emerald-300">Simple y transparente</p>
+            <p className="font-black uppercase tracking-[.18em] text-emerald-300">
+              Simple y transparente
+            </p>
             <h2 className="mt-4 text-balance text-3xl font-black sm:text-5xl">
               De buscar atención a tener una cita, en tres pasos.
             </h2>
           </div>
           <div className="mt-14 grid gap-5 md:grid-cols-3">
             {steps.map(({ icon: Icon, number, title, text }) => (
-              <article className="rounded-[1.75rem] border border-white/10 bg-white/[.06] p-7" key={number}>
+              <article
+                className="rounded-[1.75rem] border border-white/10 bg-white/[.06] p-7"
+                key={number}
+              >
                 <div className="flex items-center justify-between">
                   <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-emerald-300">
                     <Icon size={24} />
@@ -417,12 +438,18 @@ export default function HomePage() {
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-mint">
               <UsersRound size={24} />
             </span>
-            <p className="mt-7 text-sm font-black uppercase tracking-[.16em] text-mint">Para pacientes</p>
+            <p className="mt-7 text-sm font-black uppercase tracking-[.16em] text-mint">
+              Para pacientes
+            </p>
             <h2 className="mt-3 text-3xl font-black">Más claridad para elegir tu atención.</h2>
             <p className="mt-4 leading-7 text-slate-600">
-              Explora profesionales, conoce sus modalidades y reserva basándote en disponibilidad real.
+              Explora profesionales, conoce sus modalidades y reserva basándote en disponibilidad
+              real.
             </p>
-            <Link className="mt-7 inline-flex items-center gap-2 font-black text-ocean" href="/medicos">
+            <Link
+              className="mt-7 inline-flex items-center gap-2 font-black text-ocean"
+              href="/medicos"
+            >
               Buscar atención <ArrowRight size={18} />
             </Link>
           </article>
@@ -430,12 +457,20 @@ export default function HomePage() {
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-ocean">
               <Stethoscope size={24} />
             </span>
-            <p className="mt-7 text-sm font-black uppercase tracking-[.16em] text-ocean">Para médicos</p>
-            <h2 className="mt-3 text-3xl font-black">Una forma simple de acercarte a más pacientes.</h2>
-            <p className="mt-4 leading-7 text-slate-600">
-              Presenta tu perfil profesional, define tu disponibilidad y organiza tus próximas atenciones.
+            <p className="mt-7 text-sm font-black uppercase tracking-[.16em] text-ocean">
+              Para médicos
             </p>
-            <Link className="mt-7 inline-flex items-center gap-2 font-black text-ocean" href="/registro">
+            <h2 className="mt-3 text-3xl font-black">
+              Una forma simple de acercarte a más pacientes.
+            </h2>
+            <p className="mt-4 leading-7 text-slate-600">
+              Presenta tu perfil profesional, define tu disponibilidad y organiza tus próximas
+              atenciones.
+            </p>
+            <Link
+              className="mt-7 inline-flex items-center gap-2 font-black text-ocean"
+              href="/registro"
+            >
               Unirme como médico <ArrowRight size={18} />
             </Link>
           </article>
@@ -447,7 +482,9 @@ export default function HomePage() {
           <div className="absolute -left-16 -top-20 h-64 w-64 rounded-full border-[42px] border-white/10" />
           <div className="absolute -bottom-24 -right-12 h-64 w-64 rounded-full bg-ink/10" />
           <div className="relative mx-auto max-w-3xl">
-            <p className="font-black uppercase tracking-[.18em] text-emerald-100">Tu bienestar merece cercanía</p>
+            <p className="font-black uppercase tracking-[.18em] text-emerald-100">
+              Tu bienestar merece cercanía
+            </p>
             <h2 className="mt-4 text-balance text-3xl font-black sm:text-5xl">
               Encuentra una atención que se adapte a ti.
             </h2>
@@ -458,7 +495,10 @@ export default function HomePage() {
               <Link className="btn-secondary min-h-12 border-white bg-white px-6" href="/medicos">
                 Buscar un médico <ArrowRight size={18} />
               </Link>
-              <Link className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/40 px-6 font-bold text-white hover:bg-white/10" href="/registro">
+              <Link
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/40 px-6 font-bold text-white hover:bg-white/10"
+                href="/registro"
+              >
                 Crear mi cuenta
               </Link>
             </div>

@@ -1,13 +1,11 @@
 import { redirect } from 'next/navigation'
-import { createInsForgeServerClient } from '@/lib/insforge/server'
+import { WorkspaceUnavailable } from '@/components/workspace-unavailable'
+import { resolveWorkspaceAccess } from '@/lib/insforge/workspace-session'
+
 export default async function DoctorLayout({ children }: { children: React.ReactNode }) {
-  const client = await createInsForgeServerClient()
-  const { data } = await client.auth.getCurrentUser()
-  if (!data.user) redirect('/login')
-  const { data: roles } = await client.database
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', data.user.id)
-  if (!(roles ?? []).some((r) => (r as { role: string }).role === 'DOCTOR')) redirect('/panel')
+  const access = await resolveWorkspaceAccess('DOCTOR')
+  if (access.status === 'anonymous') redirect('/login?next=/medico')
+  if (access.status === 'wrong-role') redirect('/panel')
+  if (access.status === 'unavailable') return <WorkspaceUnavailable />
   return children
 }

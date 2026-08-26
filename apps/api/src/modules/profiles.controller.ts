@@ -39,9 +39,7 @@ class AvailabilityItemDto {
   @Matches(/^([01]\d|2[0-3]):(00|30)$/) endTime: string
   @ApiProperty({ enum: ['VIRTUAL', 'HOME_VISIT'] })
   @IsIn(['VIRTUAL', 'HOME_VISIT'])
-  consultationMode:
-    | 'VIRTUAL'
-    | 'HOME_VISIT'
+  consultationMode: 'VIRTUAL' | 'HOME_VISIT'
 }
 class AvailabilityDto {
   @IsArray()
@@ -141,7 +139,10 @@ export class ProfilesController {
         .select('id,availability_date,start_time,end_time,consultation_mode')
         .eq('doctor_id', req.user.id)
         .eq('active', true)
-        .gte('availability_date', new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' }))
+        .gte(
+          'availability_date',
+          new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' }),
+        )
         .order('availability_date', { ascending: true })
         .order('start_time', { ascending: true })
         .limit(600),

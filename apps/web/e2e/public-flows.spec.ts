@@ -23,7 +23,9 @@ test('registro ofrece OTP, roles y controles independientes de contraseña', asy
 
 test('la propuesta muestra exactamente las dos modalidades', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Consulta virtual', exact: true }).first()).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Consulta virtual', exact: true }).first(),
+  ).toBeVisible()
   await expect(
     page.getByRole('heading', { name: 'Atención a domicilio', exact: true }).first(),
   ).toBeVisible()
@@ -38,16 +40,20 @@ test('buscar médicos integra especialidades, perfiles y disponibilidad', async 
   await expect(publicNavigation.getByRole('link', { name: 'Especialidades' })).toHaveCount(0)
 
   await publicNavigation.getByRole('link', { name: 'Buscar médicos' }).click()
-  await expect(page.getByRole('heading', { name: '¿Qué tipo de atención necesitas?' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: '¿Qué tipo de atención necesitas?' }),
+  ).toBeVisible()
   await expect(page.getByText('Panel médico', { exact: true })).toHaveCount(0)
   await expect(page.getByRole('contentinfo')).toBeVisible()
 
   await page.getByRole('button', { name: /Pediatría/i }).click()
   await expect(page.getByText('3 resultados')).toBeVisible()
 
-  const firstProfile = page.getByRole('link', {
-    name: 'Conocer perfil y disponibilidad',
-  }).first()
+  const firstProfile = page
+    .getByRole('link', {
+      name: 'Conocer perfil y disponibilidad',
+    })
+    .first()
   await firstProfile.click()
 
   await expect(page.getByText('Perfil demostrativo:', { exact: true })).toBeVisible()

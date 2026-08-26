@@ -24,7 +24,10 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="font-black">Explora</p>
-          <nav className="mt-4 grid gap-3 text-sm text-slate-600" aria-label="Enlaces del pie de página">
+          <nav
+            className="mt-4 grid gap-3 text-sm text-slate-600"
+            aria-label="Enlaces del pie de página"
+          >
             <Link href="/medicos">Buscar médicos</Link>
             <Link href="/#como-funciona">Cómo funciona</Link>
           </nav>

@@ -1,7 +1,7 @@
 # Proyecto plataforma_medica — Especificación técnica del MVP
 
 > Archivo de contexto y ejecución para Codex.
->  
+>
 > Objetivo: construir un MVP profesional, mantenible y seguro de una plataforma tipo marketplace que conecte pacientes con médicos, empezando por una aplicación web y dejando una arquitectura preparada para una futura aplicación móvil.
 
 ---
