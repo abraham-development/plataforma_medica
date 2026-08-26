@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { CalendarDays, House, Laptop } from 'lucide-react'
-import { insforge } from '@/lib/insforge/client'
-import {
-  authenticatedApiFetch,
-  handleSessionError,
-  SessionExpiredError,
-} from '@/lib/insforge/authenticated-fetch'
+import { authenticatedApiFetch, handleSessionError } from '@/lib/insforge/authenticated-fetch'
 
 type Appointment = {
   id: string
@@ -28,9 +23,8 @@ const statusLabels: Record<Appointment['status'], string> = {
   NO_SHOW: 'No asistió',
 }
 
-export function AppointmentList() {
+export function AppointmentList({ role }: { role: 'PATIENT' | 'DOCTOR' }) {
   const [items, setItems] = useState<Appointment[]>([])
-  const [role, setRole] = useState<'PATIENT' | 'DOCTOR' | 'ADMIN' | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -39,25 +33,9 @@ export function AppointmentList() {
     setLoading(true)
     setError('')
     try {
-      const { data: user, error: userError } = await insforge.auth.getCurrentUser()
-      if (userError) throw userError
-      if (!user.user) {
-        handleSessionError(new SessionExpiredError())
-        return
-      }
-      const [appointmentsResponse, roles] = await Promise.all([
-        authenticatedApiFetch('/appointments/me'),
-        insforge.database.from('user_roles').select('role').eq('user_id', user.user.id),
-      ])
+      const appointmentsResponse = await authenticatedApiFetch('/appointments/me')
       if (!appointmentsResponse.ok) throw new Error('No pudimos cargar tus citas.')
-      if (roles.error) throw roles.error
       setItems((await appointmentsResponse.json()) as Appointment[])
-      const availableRoles = (roles.data ?? []) as { role: 'PATIENT' | 'DOCTOR' | 'ADMIN' }[]
-      setRole(
-        availableRoles.find((value) => value.role === 'DOCTOR')?.role ??
-          availableRoles[0]?.role ??
-          null,
-      )
     } catch (error) {
       if (!handleSessionError(error)) {
         setError(error instanceof Error ? error.message : 'No pudimos cargar tus citas.')
@@ -110,8 +88,14 @@ export function AppointmentList() {
     return (
       <div className="card p-8 text-center">
         <CalendarDays className="mx-auto text-mint" size={36} />
-        <h2 className="mt-4 text-xl font-bold">Aún no tienes citas</h2>
-        <p className="mt-2 text-slate-600">Busca un médico y elige un horario disponible.</p>
+        <h2 className="mt-4 text-xl font-bold">
+          {role === 'DOCTOR' ? 'Tu agenda está libre' : 'Aún no tienes citas'}
+        </h2>
+        <p className="mt-2 text-slate-600">
+          {role === 'DOCTOR'
+            ? 'Tus próximas atenciones aparecerán aquí.'
+            : 'Busca un médico y elige un horario disponible.'}
+        </p>
       </div>
     )
 

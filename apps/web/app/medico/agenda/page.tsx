@@ -7,7 +7,7 @@ export default function DoctorAgenda() {
       description="Consultas virtuales y atenciones a domicilio programadas."
       links={[]}
     >
-      <AppointmentList />
+      <AppointmentList role="DOCTOR" />
     </DashboardShell>
   )
 }

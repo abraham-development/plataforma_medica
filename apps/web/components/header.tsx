@@ -12,7 +12,6 @@ import {
   type WorkspaceRole,
   workspaceForPath,
 } from '@/lib/doctor-workspace'
-import { insforge } from '@/lib/insforge/client'
 
 type SessionState = {
   status: 'loading' | 'anonymous' | 'authenticated' | 'unavailable'
@@ -23,57 +22,25 @@ type SessionState = {
 const anonymousSession: SessionState = { status: 'anonymous', role: null, displayName: null }
 const SESSION_TIMEOUT_MS = 4_000
 
-function hasBrowserInsforgeConfig() {
-  const baseUrl = process.env.NEXT_PUBLIC_INSFORGE_URL
-  const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY
-
-  return Boolean(
-    baseUrl && anonKey && !baseUrl.includes('://example.') && anonKey !== 'ci-placeholder',
-  )
-}
-
 async function resolveBrowserSession(preferredRole?: WorkspaceRole): Promise<SessionState> {
-  const { data, error } = await insforge.auth.getCurrentUser()
-  if (error) throw error
-  if (!data.user) return anonymousSession
-
-  const { data: roles, error: rolesError } = await insforge.database
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', data.user.id)
-  if (rolesError) throw rolesError
-  const values = (roles ?? []) as { role: string }[]
-  const availableRoles = values.map((item) => item.role)
-  const role =
-    preferredRole && availableRoles.includes(preferredRole)
-      ? preferredRole
-      : (availableRoles.find((item) => item === 'DOCTOR') ?? availableRoles[0] ?? null)
-
-  const profileTable = role === 'DOCTOR' ? 'doctor_profiles' : 'patient_profiles'
-  const [account, profile] = await Promise.all([
-    insforge.database.from('users').select('display_name').eq('id', data.user.id).maybeSingle(),
-    role === 'DOCTOR' || role === 'PATIENT'
-      ? insforge.database
-          .from(profileTable)
-          .select('first_name,last_name')
-          .eq('user_id', data.user.id)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
-  ])
-  const profileValue = profile.data as {
-    first_name?: string | null
-    last_name?: string | null
-  } | null
-  const accountValue = account.data as { display_name?: string | null } | null
-  const profileName = [profileValue?.first_name, profileValue?.last_name]
-    .map((part) => part?.trim())
-    .filter(Boolean)
-    .join(' ')
+  const response = await fetch('/api/auth/session', {
+    cache: 'no-store',
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+  })
+  if (response.status === 401) return anonymousSession
+  if (!response.ok) throw new Error('No pudimos verificar la sesión.')
+  const session = (await response.json()) as {
+    authenticated: boolean
+    role: string | null
+    displayName: string | null
+  }
+  if (!session.authenticated) return anonymousSession
 
   return {
     status: 'authenticated',
-    role,
-    displayName: profileName || accountValue?.display_name?.trim() || null,
+    role: preferredRole ?? session.role,
+    displayName: session.displayName,
   }
 }
 
@@ -323,11 +290,6 @@ export function Header() {
   })
 
   const loadSession = useCallback(async () => {
-    if (!hasBrowserInsforgeConfig()) {
-      setSession(anonymousSession)
-      return
-    }
-
     if (workspace) {
       try {
         setSession(await resolveBrowserSession(workspace.role))

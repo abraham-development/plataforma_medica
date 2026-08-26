@@ -19,7 +19,10 @@ function isProtectedWorkspace(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname === '/sesion-no-disponible') {
+  if (
+    request.nextUrl.pathname === '/sesion-no-disponible' ||
+    request.nextUrl.pathname === '/api/auth/refresh'
+  ) {
     return NextResponse.next({ request })
   }
 
@@ -55,5 +58,7 @@ export async function proxy(request: NextRequest) {
   return response
 }
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!api/auth/refresh|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

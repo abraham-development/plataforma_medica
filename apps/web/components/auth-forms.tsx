@@ -1,6 +1,5 @@
 'use client'
 import { useActionState, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, LoaderCircle, MailCheck } from 'lucide-react'
 import {
   resendVerification,
@@ -60,7 +59,6 @@ function Submit({ pending, children }: { pending: boolean; children: React.React
 }
 
 export function RegisterForm() {
-  const router = useRouter()
   const [step, setStep] = useState<'form' | 'otp'>('form')
   const [state, action, pending] = useActionState(signUp, initial)
   const [verifyState, verifyAction, verifying] = useActionState(verifyRegistration, initial)
@@ -70,11 +68,10 @@ export function RegisterForm() {
   }, [state.ok])
   useEffect(() => {
     if (verifyState.ok) {
-      window.dispatchEvent(new Event('medicerca:auth-changed'))
-      const timeout = setTimeout(() => router.push('/panel'), 900)
+      const timeout = setTimeout(() => window.location.assign('/panel'), 900)
       return () => clearTimeout(timeout)
     }
-  }, [verifyState.ok, router])
+  }, [verifyState.ok])
   if (step === 'otp')
     return (
       <div className="grid gap-5">
@@ -174,14 +171,12 @@ export function RegisterForm() {
 }
 
 export function LoginForm({ nextPath = '/panel' }: { nextPath?: string }) {
-  const router = useRouter()
   const [state, action, pending] = useActionState(signIn, initial)
   useEffect(() => {
     if (state.ok) {
-      window.dispatchEvent(new Event('medicerca:auth-changed'))
-      router.push(nextPath)
+      window.location.assign(nextPath)
     }
-  }, [nextPath, state.ok, router])
+  }, [nextPath, state.ok])
   return (
     <form action={action} className="grid gap-5">
       <div>

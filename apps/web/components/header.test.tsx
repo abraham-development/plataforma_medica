@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Header } from './header'
-import { insforge } from '@/lib/insforge/client'
 
 let pathname = '/medico'
 const replace = jest.fn()
@@ -20,44 +19,22 @@ jest.mock('next/image', () => ({
 
 jest.mock('@/app/actions/auth', () => ({ signOut: jest.fn() }))
 
-function queryResult<T>(data: T) {
-  const result = { data, error: null }
+function sessionResponse(displayName: string) {
   return {
-    maybeSingle: jest.fn().mockResolvedValue(result),
-    then: (resolve: (value: typeof result) => unknown, reject: (reason: unknown) => unknown) =>
-      Promise.resolve(result).then(resolve, reject),
-  }
+    ok: true,
+    status: 200,
+    json: jest.fn().mockResolvedValue({
+      authenticated: true,
+      role: pathname.startsWith('/medico') ? 'DOCTOR' : 'PATIENT',
+      displayName,
+    }),
+  } as unknown as Response
 }
-
-jest.mock('@/lib/insforge/client', () => ({
-  insforge: {
-    auth: { getCurrentUser: jest.fn() },
-    database: {
-      from: jest.fn((table: string) => ({
-        select: jest.fn(() => ({
-          eq: jest.fn(() => {
-            if (table === 'user_roles') {
-              return queryResult(
-                pathname.startsWith('/medico') ? [{ role: 'DOCTOR' }] : [{ role: 'PATIENT' }],
-              )
-            }
-            if (table === 'users') return queryResult({ display_name: 'Nombre registrado' })
-            return queryResult({ first_name: 'Andrea', last_name: 'Salazar' })
-          }),
-        })),
-      })),
-    },
-  },
-}))
-
-const getCurrentUser = jest.mocked(insforge.auth.getCurrentUser)
 
 describe('workspace header', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    process.env.NEXT_PUBLIC_INSFORGE_URL = 'https://project.example.test'
-    process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY = 'anon-key'
-    getCurrentUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null } as never)
+    global.fetch = jest.fn(async () => sessionResponse('Alicia'))
   })
 
   it('identifies the doctor workspace and exposes its account menu', async () => {
@@ -67,7 +44,7 @@ describe('workspace header', () => {
     expect(screen.getAllByText('Panel médico')[0]).toBeVisible()
     expect(screen.getByRole('link', { name: 'Agenda' })).toHaveAttribute('aria-current', 'page')
     const account = await screen.findByRole('button', {
-      name: 'Abrir menú de cuenta de Andrea Salazar',
+      name: 'Abrir menú de cuenta de Alicia',
     })
     fireEvent.click(account)
     expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute(
@@ -84,10 +61,25 @@ describe('workspace header', () => {
     expect(screen.getAllByText('Panel del paciente')[0]).toBeVisible()
     expect(screen.getByRole('link', { name: 'Mis citas' })).toHaveAttribute('aria-current', 'page')
     await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: 'Abrir menú de cuenta de Andrea Salazar' }),
-      ).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Abrir menú de cuenta de Alicia' })).toBeVisible()
     })
     expect(screen.getByRole('link', { name: 'Buscar médicos' })).toBeVisible()
+  })
+
+  it('replaces the registration name after the professional profile changes', async () => {
+    pathname = '/medico/perfil'
+    const fetchMock = jest.mocked(global.fetch)
+    fetchMock
+      .mockResolvedValueOnce(sessionResponse('Alicia'))
+      .mockResolvedValueOnce(sessionResponse('Alicia Torres'))
+    render(<Header />)
+
+    expect(
+      await screen.findByRole('button', { name: 'Abrir menú de cuenta de Alicia' }),
+    ).toBeVisible()
+    window.dispatchEvent(new Event('medicerca:profile-changed'))
+    expect(
+      await screen.findByRole('button', { name: 'Abrir menú de cuenta de Alicia Torres' }),
+    ).toBeVisible()
   })
 })

@@ -13,7 +13,7 @@ export default function PatientPage() {
         <Search size={18} /> Buscar un médico
       </Link>
       <h2 className="mb-4 text-xl font-bold">Tus citas</h2>
-      <AppointmentList />
+      <AppointmentList role="PATIENT" />
     </DashboardShell>
   )
 }

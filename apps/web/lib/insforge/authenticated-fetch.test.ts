@@ -1,15 +1,8 @@
-jest.mock('./client', () => ({
-  insforge: { auth: { getCurrentUser: jest.fn() } },
-}))
-
-import { insforge } from './client'
 import {
   authenticatedApiFetch,
   SessionExpiredError,
   SessionUnavailableError,
 } from './authenticated-fetch'
-
-const getCurrentUser = jest.mocked(insforge.auth.getCurrentUser)
 
 function setAccessToken(value: string) {
   document.cookie = `insforge_access_token=${encodeURIComponent(value)}; path=/`
@@ -24,7 +17,6 @@ describe('authenticatedApiFetch', () => {
     jest.resetAllMocks()
     document.cookie = 'insforge_access_token=; Max-Age=0; path=/'
     process.env.NEXT_PUBLIC_API_URL = 'https://api.example.test/api/v1'
-    getCurrentUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null } as never)
     global.fetch = jest.fn()
   })
 
@@ -59,24 +51,32 @@ describe('authenticatedApiFetch', () => {
     expect(retryHeaders.get('Authorization')).toBe('Bearer access-new')
   })
 
-  it('keeps a transient verification error distinct from an expired session', async () => {
-    setAccessToken('access-one')
-    getCurrentUser.mockResolvedValue({
-      data: { user: null },
-      error: { statusCode: 503, message: 'Temporarily unavailable' },
-    } as never)
+  it('uses the same-origin refresh route when the access cookie is missing', async () => {
+    const fetchMock = jest.mocked(global.fetch)
+    fetchMock
+      .mockImplementationOnce(async () => {
+        setAccessToken('access-restored')
+        return mockResponse()
+      })
+      .mockResolvedValueOnce(mockResponse())
+
+    await authenticatedApiFetch('/appointments/me')
+
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/auth/refresh')
+    const headers = new Headers(fetchMock.mock.calls[1][1]?.headers)
+    expect(headers.get('Authorization')).toBe('Bearer access-restored')
+  })
+
+  it('keeps a transient refresh failure distinct from an expired session', async () => {
+    jest.mocked(global.fetch).mockResolvedValue(mockResponse(503))
 
     await expect(authenticatedApiFetch('/appointments/me')).rejects.toBeInstanceOf(
       SessionUnavailableError,
     )
   })
 
-  it('reports a definitive authentication failure as expired', async () => {
-    setAccessToken('access-one')
-    getCurrentUser.mockResolvedValue({
-      data: { user: null },
-      error: { statusCode: 401, message: 'Unauthorized' },
-    } as never)
+  it('reports a definitive refresh failure as expired', async () => {
+    jest.mocked(global.fetch).mockResolvedValue(mockResponse(401))
 
     await expect(authenticatedApiFetch('/appointments/me')).rejects.toBeInstanceOf(
       SessionExpiredError,

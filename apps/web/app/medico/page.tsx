@@ -7,7 +7,7 @@ export default function DoctorDashboard() {
       description="Administra tu perfil, agenda y citas."
       links={[]}
     >
-      <AppointmentList />
+      <AppointmentList role="DOCTOR" />
     </DashboardShell>
   )
 }

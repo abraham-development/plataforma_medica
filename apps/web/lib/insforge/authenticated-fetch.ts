@@ -1,8 +1,5 @@
 'use client'
 
-import { insforge } from './client'
-import { isDefinitiveAuthError } from './auth-errors'
-
 export class SessionExpiredError extends Error {
   constructor() {
     super('Tu sesión venció. Vuelve a iniciar sesión.')
@@ -32,17 +29,9 @@ function readAccessToken() {
   }
 }
 
-async function ensureCurrentSession() {
-  const { data, error } = await insforge.auth.getCurrentUser()
-  if (error) {
-    if (isDefinitiveAuthError(error)) throw new SessionExpiredError()
-    throw new SessionUnavailableError()
-  }
-  if (!data.user) throw new SessionExpiredError()
-
+async function currentAccessToken() {
   const token = readAccessToken()
-  if (!token) throw new SessionUnavailableError()
-  return token
+  return token ?? refreshCurrentSession()
 }
 
 async function refreshCurrentSession() {
@@ -77,7 +66,7 @@ export async function authenticatedApiFetch(path: string, init?: RequestInit) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL
   if (!baseUrl) throw new SessionUnavailableError('La API de MediCerca no está configurada.')
 
-  let token = await ensureCurrentSession()
+  let token = await currentAccessToken()
   let response: Response
   try {
     response = await fetch(`${baseUrl}${path}`, withBearer(init, token))
