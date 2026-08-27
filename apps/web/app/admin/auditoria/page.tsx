@@ -1,19 +1,13 @@
 import { DashboardShell } from '@/components/dashboard-shell'
 import { AdminTable } from '@/components/admin-table'
-const links = [
-  { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/medicos', label: 'Médicos' },
-  { href: '/admin/usuarios', label: 'Usuarios' },
-  { href: '/admin/especialidades', label: 'Especialidades' },
-  { href: '/admin/citas', label: 'Citas' },
-  { href: '/admin/auditoria', label: 'Auditoría' },
-]
+import { adminWorkspaceLinks } from '@/lib/admin-workspace'
+
 export default function Page() {
   return (
     <DashboardShell
       title="Auditoría"
       description="Trazabilidad de acciones administrativas sensibles."
-      links={links}
+      links={[...adminWorkspaceLinks]}
     >
       <AdminTable
         table="admin_audit_logs"

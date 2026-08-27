@@ -1261,6 +1261,8 @@ No mezclar lógica de pagos directamente dentro de `AppointmentsModule`.
 
 Una cita puede existir independientemente del proveedor de pagos.
 
+El MVP puede guardar las instrucciones de desembolso del médico (Yape o cuenta bancaria en PEN) sin implementar cobros, comisiones, conciliación ni transferencias. Los pacientes pagan a MediCerca y nunca directamente a esos destinos.
+
 ---
 
 ## Fase 3 — Notificaciones avanzadas

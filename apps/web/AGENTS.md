@@ -21,9 +21,10 @@ Antes de cambiar una API o convención de Next.js, consultar la documentación i
 - Sitio público: header con top bar (logotipo a la izquierda; iniciar sesión y crear cuenta a la derecha) y una barra de navegación separada para el menú público.
 - El descubrimiento público se concentra en `Buscar médicos` (`/medicos`): primero se elige la especialidad, después se comparan profesionales y finalmente se abre el perfil con disponibilidad. `/especialidades` solo redirige a ese recorrido y no debe aparecer como opción independiente.
 - Los perfiles locales de muestra deben identificarse claramente como ficticios; sus fotos, reseñas, registros y horarios nunca se presentan como datos médicos reales.
-- Médico: navegación exclusiva con este orden: `Resumen`, `Perfil profesional`, `Agenda`, `Disponibilidad`. El rótulo superior es `Panel médico`.
+- Médico: navegación exclusiva con este orden: `Resumen`, `Perfil profesional`, `Agenda`, `Disponibilidad`, `Método de pago`. El rótulo superior es `Panel médico`.
 - No mostrar al médico autenticado el menú público de búsqueda, especialidades o funcionamiento, ni agregarle flujos para reservar con otro médico.
 - Paciente y administrador conservan layouts y permisos separados.
+- `Método de pago` administra destinos de desembolso de MediCerca en PEN (`Yape` o cuenta bancaria), admite varios y uno principal. Enmascarar los valores guardados; los números completos solo se revelan al administrador mediante el endpoint auditado y nunca deben persistirse en almacenamiento del navegador.
 - Los layouts de rol deben validar sesión y rol en el servidor antes de renderizar el panel.
 - El encabezado resuelve la sesión con el cliente SSR del navegador para no bloquear ni volver dinámicas las páginas públicas. La cookie `medicerca_role` es solo una pista de navegación; nunca reemplaza la validación autoritativa de los layouts protegidos.
 

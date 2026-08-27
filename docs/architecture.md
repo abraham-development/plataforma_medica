@@ -22,9 +22,15 @@ La defensa se aplica en dos capas: guards de NestJS y RLS/funciones `SECURITY DE
 
 Solo existen `VIRTUAL` y `HOME_VISIT`. Todas duran 30 minutos y se guardan en UTC; la disponibilidad se interpreta en `America/Lima`. Índices únicos parciales impiden doble reserva activa para médico o paciente. La atención a domicilio exige un distrito cubierto, dirección y referencia.
 
+## Destinos de pago a médicos
+
+El médico puede registrar varios destinos de desembolso en soles —Yape o cuenta bancaria— y marcar uno como principal. Los datos se almacenan en `doctor_payout_methods`: RLS limita la lectura al médico propietario y las escrituras pasan por RPC transaccionales. El administrador obtiene primero un resumen enmascarado; revelar los valores completos exige una acción explícita que crea un registro en `admin_audit_logs`.
+
+Esta configuración no procesa dinero. El cobro al paciente, las comisiones, la conciliación y la transferencia efectiva al médico siguen fuera del MVP y se incorporarán como un módulo separado.
+
 ## Decisiones de alcance
 
 - La confirmación y recuperación usan códigos OTP nativos de InsForge.
 - La videollamada del MVP usa un enlace HTTPS externo configurado por el médico.
 - La aprobación del médico es manual desde el panel administrativo.
-- Pagos, historias clínicas, recetas y videollamada propia quedan fuera del MVP.
+- El procesamiento de pagos, las historias clínicas, las recetas y la videollamada propia quedan fuera del MVP.

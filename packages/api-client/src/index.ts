@@ -2,7 +2,9 @@ export type Role = 'PATIENT' | 'DOCTOR' | 'ADMIN'
 export type AccountStatus = 'ACTIVE' | 'SUSPENDED'
 export type DoctorVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED'
 export type ConsultationMode = 'VIRTUAL' | 'HOME_VISIT'
-export type AppointmentStatus = 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW'
+export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW'
+export type PayoutMethodType = 'YAPE' | 'BANK_ACCOUNT'
+export type BankAccountType = 'SAVINGS' | 'CHECKING'
 
 export interface ApiErrorBody {
   statusCode: number
@@ -56,6 +58,63 @@ export interface Appointment {
   createdAt: string
 }
 
+interface PayoutMethodBase {
+  id: string
+  doctorId: string
+  holderName: string
+  currency: 'PEN'
+  preferred: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface YapePayoutMethod extends PayoutMethodBase {
+  type: 'YAPE'
+  yapePhone: string
+  bankName: null
+  bankAccountType: null
+  bankAccountNumber: null
+  cci: null
+}
+
+export interface BankPayoutMethod extends PayoutMethodBase {
+  type: 'BANK_ACCOUNT'
+  yapePhone: null
+  bankName: string
+  bankAccountType: BankAccountType
+  bankAccountNumber: string
+  cci: string | null
+}
+
+export type DoctorPayoutMethod = YapePayoutMethod | BankPayoutMethod
+
+export type PayoutMethodPayload =
+  | {
+      type: 'YAPE'
+      holderName: string
+      yapePhone: string
+      preferred?: boolean
+    }
+  | {
+      type: 'BANK_ACCOUNT'
+      holderName: string
+      bankName: string
+      bankAccountType: BankAccountType
+      bankAccountNumber: string
+      cci?: string
+      preferred?: boolean
+    }
+
+export interface AdminDoctorPayoutSummary {
+  doctorId: string
+  doctorName: string
+  verificationStatus: DoctorVerificationStatus
+  methodCount: number
+  preferredType: PayoutMethodType | null
+  preferredMaskedDestination: string | null
+  methodsUpdatedAt: string | null
+}
+
 export class ApiClient {
   constructor(
     private readonly baseUrl: string,
@@ -101,6 +160,39 @@ export class ApiClient {
     return this.request<Appointment>(`/appointments/${id}/cancel`, {
       method: 'PATCH',
       body: JSON.stringify({ reason }),
+    })
+  }
+  payoutMethods() {
+    return this.request<DoctorPayoutMethod[]>('/doctors/me/payout-methods')
+  }
+  createPayoutMethod(payload: PayoutMethodPayload) {
+    return this.request<DoctorPayoutMethod>('/doctors/me/payout-methods', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  }
+  updatePayoutMethod(id: string, payload: PayoutMethodPayload) {
+    return this.request<DoctorPayoutMethod>(`/doctors/me/payout-methods/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    })
+  }
+  deletePayoutMethod(id: string) {
+    return this.request<{ deleted: true }>(`/doctors/me/payout-methods/${id}`, {
+      method: 'DELETE',
+    })
+  }
+  preferPayoutMethod(id: string) {
+    return this.request<DoctorPayoutMethod>(`/doctors/me/payout-methods/${id}/preferred`, {
+      method: 'POST',
+    })
+  }
+  adminDoctorPayoutSummaries() {
+    return this.request<AdminDoctorPayoutSummary[]>('/admin/doctor-payout-methods')
+  }
+  revealDoctorPayoutMethods(doctorId: string) {
+    return this.request<DoctorPayoutMethod[]>(`/admin/doctors/${doctorId}/payout-methods/reveal`, {
+      method: 'POST',
     })
   }
 }

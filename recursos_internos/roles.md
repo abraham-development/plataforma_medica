@@ -159,6 +159,8 @@ El médico puede:
 - agregar biografía profesional;
 - configurar modalidad de atención;
 - definir disponibilidad;
+- registrar varios destinos de desembolso en soles mediante Yape o cuenta bancaria;
+- elegir un destino de desembolso principal;
 - consultar sus propias citas;
 - administrar su agenda;
 - editar información permitida de su perfil;
@@ -633,9 +635,11 @@ La arquitectura debe permitir evolucionar después.
 
 ---
 
-# 19. Futuro: pagos
+# 19. Futuro: procesamiento de pagos
 
-Cuando se agreguen pagos, el backoffice deberá gestionar incidencias como:
+El MVP solo conserva las instrucciones de desembolso indicadas por el médico. MediCerca cobra al paciente y esos destinos no deben mostrarse como canales de pago directo. El administrador ve valores enmascarados y toda revelación de números completos queda auditada.
+
+Cuando se agregue el procesamiento de pagos, el backoffice deberá gestionar incidencias como:
 
 ```text
 pago rechazado
@@ -649,7 +653,7 @@ comisión
 transferencia
 ```
 
-No implementar estas funciones durante el MVP.
+No implementar todavía el cobro, la conciliación ni la ejecución del desembolso.
 
 ---
 

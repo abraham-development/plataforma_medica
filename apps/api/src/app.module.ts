@@ -13,6 +13,10 @@ import { AuthController } from './modules/auth.controller'
 import { ProfilesController } from './modules/profiles.controller'
 import { AppointmentsController } from './modules/appointments.controller'
 import { AdminController } from './modules/admin.controller'
+import {
+  AdminPayoutMethodsController,
+  PayoutMethodsController,
+} from './modules/payout-methods.controller'
 
 @Module({
   imports: [
@@ -35,6 +39,8 @@ import { AdminController } from './modules/admin.controller'
     ProfilesController,
     AppointmentsController,
     AdminController,
+    PayoutMethodsController,
+    AdminPayoutMethodsController,
   ],
   providers: [
     InsForgeService,

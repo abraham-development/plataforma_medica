@@ -43,6 +43,10 @@ describe('workspace header', () => {
 
     expect(screen.getAllByText('Panel médico')[0]).toBeVisible()
     expect(screen.getByRole('link', { name: 'Agenda' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: 'Método de pago' })).toHaveAttribute(
+      'href',
+      '/medico/metodo-de-pago',
+    )
     const account = await screen.findByRole('button', {
       name: 'Abrir menú de cuenta de Alicia',
     })

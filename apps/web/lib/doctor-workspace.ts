@@ -3,6 +3,7 @@ export const doctorWorkspaceLinks = [
   { href: '/medico/perfil', label: 'Perfil profesional' },
   { href: '/medico/agenda', label: 'Agenda' },
   { href: '/medico/disponibilidad', label: 'Disponibilidad' },
+  { href: '/medico/metodo-de-pago', label: 'Método de pago' },
 ] as const
 
 export const patientWorkspaceLinks = [

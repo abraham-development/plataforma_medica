@@ -39,7 +39,9 @@ El producto es uno, pero Next.js y NestJS son dos procesos desplegables. No desc
 - El registro permite únicamente `PATIENT` y `DOCTOR`, exige verificación OTP por correo y completa el rol solo después de verificar la cuenta.
 - `ADMIN` nunca se puede elegir en el registro público.
 - Pacientes: pueden buscar médicos, revisar especialidades y reservar según la disponibilidad publicada.
-- Médicos: tienen un espacio propio con `Resumen`, `Perfil profesional`, `Agenda` y `Disponibilidad`. No deben ver el menú público para buscar médicos ni reservar citas.
+- Médicos: tienen un espacio propio con `Resumen`, `Perfil profesional`, `Agenda`, `Disponibilidad` y `Método de pago`. No deben ver el menú público para buscar médicos ni reservar citas.
+- `Método de pago` permite registrar varios destinos de desembolso en soles (`Yape` o cuenta bancaria) y elegir uno principal. Son instrucciones para que MediCerca pague al médico; nunca representan un pago directo del paciente.
+- Los destinos de pago son datos financieros personales: el médico solo accede a los propios mediante RLS; el administrador ve resúmenes enmascarados y cada revelado explícito de los valores completos debe quedar auditado. No registrar números completos en logs ni respuestas de error.
 - La disponibilidad médica usa fechas concretas, bloques de 30 minutos, zona horaria `America/Lima` y únicamente modalidades habilitadas en el perfil profesional.
 - El horizonte de disponibilidad y reserva es de 60 días; una reserva debe ser atómica y no puede producir doble ocupación del médico o paciente.
 - Los estados de cita del esquema son `PENDING`, `CONFIRMED`, `CANCELLED`, `COMPLETED` y `NO_SHOW`. Mantener migraciones, API, cliente compartido e interfaz sincronizados cuando cambien.
@@ -145,5 +147,5 @@ Key patterns:
 - User-scoped server requests forward the access token so RLS remains authoritative.
 - For storage uploads, persist both the returned `url` and `key`.
 - Use a backend branch for risky schema, RLS or auth configuration changes; inspect merge SQL with a dry run before applying it to production.
-- `20260813171000_harden-function-access.sql` permanece pendiente: no reintentarlo hasta que InsForge resuelva la propiedad `postgres` de las tablas o documente un procedimiento oficial. Consulte `docs/operations.md`.
+- `docs/pending-migrations/20260813171000_harden-function-access.sql` permanece pendiente: no moverlo nuevamente a `migrations/` ni reintentarlo hasta que InsForge resuelva la propiedad `postgres` de las tablas o documente un procedimiento oficial. Consulte `docs/operations.md`.
 <!-- INSFORGE:END -->
