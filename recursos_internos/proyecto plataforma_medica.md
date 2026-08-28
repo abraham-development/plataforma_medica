@@ -281,6 +281,7 @@ Implementar:
 
 - registro;
 - inicio de sesión;
+- registro e inicio de sesión con Google OAuth;
 - cierre de sesión;
 - recuperación de contraseña;
 - verificación de correo;
@@ -291,6 +292,8 @@ Implementar:
 No almacenar contraseñas en texto plano.
 
 Utilizar hashing seguro.
+
+El flujo de correo y contraseña mantiene la verificación OTP. Google OAuth usa PKCE y completa el intercambio en el servidor para conservar el refresh token en una cookie `httpOnly`; el proveedor no puede asignar `ADMIN` y las cuentas nuevas deben elegir `PATIENT` o `DOCTOR`.
 
 Diseñar autenticación de manera que pueda ser consumida en el futuro por:
 
@@ -876,6 +879,7 @@ Priorizar experiencia clara y profesional.
  /especialidades
  /login
  /registro
+ /completar-registro
 ```
 
 ## Paciente
@@ -982,6 +986,7 @@ Crear pruebas para:
 
 - registro;
 - login;
+- Google OAuth;
 - autorización;
 - permisos por roles;
 - creación de disponibilidad;

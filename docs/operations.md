@@ -4,6 +4,10 @@
 
 Use una rama backend de InsForge para cada cambio de esquema. Aplique `insforge.toml` y las migraciones allí, ejecute pruebas y use `branch merge --dry-run` antes de fusionar. No guarde `INSFORGE_API_KEY` en el repositorio ni la exponga al navegador.
 
+## Google OAuth
+
+Google debe figurar en `auth.oAuthProviders` de InsForge. En Google Cloud, el URI autorizado del proveedor apunta al backend de InsForge: `https://<appkey>.us-east.insforge.app/api/auth/oauth/google/callback`. En `insforge.toml`, `auth.allowed_redirect_urls` debe incluir el callback de cada origen web desplegado: `<origen>/api/auth/callback`. Al cambiar el dominio de Hostinger o publicar `medicerca.com`, añadir primero ese callback al archivo y aplicar la configuración antes de desplegar la web.
+
 ### Migración pendiente de InsForge
 
 `docs/pending-migrations/20260813171000_harden-function-access.sql` está pendiente y no debe moverse nuevamente a `migrations/` ni reintentarse automáticamente. InsForge ejecuta la migración como `project_admin`, pero las tablas creadas anteriormente pertenecen a `postgres`; por eso la modificación de políticas falla con `must be owner of relation specialties`. El fallo fue transaccional y no aplicó cambios parciales. Mantenga el archivo local como pendiente hasta que InsForge corrija la propiedad o proporcione un procedimiento oficial compatible.

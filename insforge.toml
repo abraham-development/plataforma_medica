@@ -1,8 +1,10 @@
 [auth]
 allowed_redirect_urls = [
   "http://localhost:3000/login",
+  "http://localhost:3000/api/auth/callback",
   "http://localhost:3000/recuperar-contrasena",
   "https://darkblue-sardine-667162.hostingersite.com/login",
+  "https://darkblue-sardine-667162.hostingersite.com/api/auth/callback",
   "https://darkblue-sardine-667162.hostingersite.com/recuperar-contrasena",
 ]
 require_email_verification = true

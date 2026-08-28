@@ -11,6 +11,7 @@ test('el encabezado tiene las dos barras y acceso a registro', async ({ page }) 
 
 test('registro ofrece OTP, roles y controles independientes de contraseña', async ({ page }) => {
   await page.goto('/registro')
+  await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible()
   await expect(page.getByLabel('Nombre de usuario')).toBeVisible()
   await expect(page.getByLabel('Correo electrónico')).toBeVisible()
   await expect(page.getByLabel('Paciente')).toBeVisible()
@@ -19,6 +20,14 @@ test('registro ofrece OTP, roles y controles independientes de contraseña', asy
   await page.getByRole('button', { name: 'Mostrar contraseña', exact: true }).click()
   await expect(page.getByLabel('Contraseña', { exact: true })).toHaveAttribute('type', 'text')
   await expect(page.getByText(/código OTP de 6 dígitos/i)).toBeVisible()
+})
+
+test('inicio de sesión ofrece acceso rápido con Google', async ({ page }) => {
+  await page.goto('/login')
+
+  await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible()
+  await expect(page.getByLabel('Correo electrónico')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible()
 })
 
 test('la propuesta muestra exactamente las dos modalidades', async ({ page }) => {

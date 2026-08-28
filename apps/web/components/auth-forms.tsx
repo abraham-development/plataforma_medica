@@ -2,6 +2,8 @@
 import { useActionState, useEffect, useState } from 'react'
 import { Eye, EyeOff, LoaderCircle, MailCheck } from 'lucide-react'
 import {
+  beginGoogleOAuth,
+  completeOAuthRegistration,
   resendVerification,
   resetPassword,
   sendPasswordReset,
@@ -55,6 +57,35 @@ function Submit({ pending, children }: { pending: boolean; children: React.React
     <button className="btn-primary w-full" disabled={pending}>
       {pending && <LoaderCircle className="animate-spin" size={18} />} {children}
     </button>
+  )
+}
+
+function GoogleButton() {
+  return (
+    <button
+      className="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3 font-bold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+      formAction={beginGoogleOAuth}
+      formNoValidate
+      type="submit"
+    >
+      <span
+        aria-hidden="true"
+        className="grid h-6 w-6 place-items-center rounded-full border border-slate-200 font-black text-[#4285f4]"
+      >
+        G
+      </span>
+      Continuar con Google
+    </button>
+  )
+}
+
+function AuthDivider({ text }: { text: string }) {
+  return (
+    <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wide text-slate-400">
+      <span className="h-px flex-1 bg-slate-200" />
+      {text}
+      <span className="h-px flex-1 bg-slate-200" />
+    </div>
   )
 }
 
@@ -117,6 +148,22 @@ export function RegisterForm() {
     )
   return (
     <form action={action} className="grid gap-5">
+      <input name="oauth_intent" type="hidden" value="register" />
+      <fieldset>
+        <legend className="label">Quiero usar MediCerca como</legend>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="cursor-pointer rounded-xl border p-4 has-[:checked]:border-mint has-[:checked]:bg-emerald-50">
+            <input type="radio" name="role" value="PATIENT" defaultChecked />{' '}
+            <span className="ml-2 font-bold">Paciente</span>
+          </label>
+          <label className="cursor-pointer rounded-xl border p-4 has-[:checked]:border-mint has-[:checked]:bg-emerald-50">
+            <input type="radio" name="role" value="DOCTOR" />{' '}
+            <span className="ml-2 font-bold">Médico</span>
+          </label>
+        </div>
+      </fieldset>
+      <GoogleButton />
+      <AuthDivider text="o crea tu cuenta con correo" />
       <div>
         <label className="label" htmlFor="name">
           Nombre de usuario
@@ -148,19 +195,6 @@ export function RegisterForm() {
       </div>
       <PasswordField name="password" label="Contraseña" />
       <PasswordField name="confirmation" label="Confirmar contraseña" />
-      <fieldset>
-        <legend className="label">Quiero usar MediCerca como</legend>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="cursor-pointer rounded-xl border p-4 has-[:checked]:border-mint has-[:checked]:bg-emerald-50">
-            <input type="radio" name="role" value="PATIENT" defaultChecked />{' '}
-            <span className="ml-2 font-bold">Paciente</span>
-          </label>
-          <label className="cursor-pointer rounded-xl border p-4 has-[:checked]:border-mint has-[:checked]:bg-emerald-50">
-            <input type="radio" name="role" value="DOCTOR" />{' '}
-            <span className="ml-2 font-bold">Médico</span>
-          </label>
-        </div>
-      </fieldset>
       <p className="text-xs text-slate-500">
         Mínimo 8 caracteres con mayúscula, minúscula y número.
       </p>
@@ -179,6 +213,10 @@ export function LoginForm({ nextPath = '/panel' }: { nextPath?: string }) {
   }, [nextPath, state.ok])
   return (
     <form action={action} className="grid gap-5">
+      <input name="oauth_intent" type="hidden" value="login" />
+      <input name="next" type="hidden" value={nextPath} />
+      <GoogleButton />
+      <AuthDivider text="o ingresa con tu correo" />
       <div>
         <label className="label" htmlFor="email">
           Correo electrónico
@@ -207,6 +245,36 @@ export function LoginForm({ nextPath = '/panel' }: { nextPath?: string }) {
       </div>
       <Notice state={state} />
       <Submit pending={pending}>Iniciar sesión</Submit>
+    </form>
+  )
+}
+
+export function OAuthRoleForm() {
+  const [state, action, pending] = useActionState(completeOAuthRegistration, initial)
+  useEffect(() => {
+    if (state.ok) window.location.assign('/panel')
+  }, [state.ok])
+
+  return (
+    <form action={action} className="grid gap-5">
+      <fieldset>
+        <legend className="label">Quiero usar MediCerca como</legend>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="cursor-pointer rounded-xl border p-4 has-[:checked]:border-mint has-[:checked]:bg-emerald-50">
+            <input defaultChecked name="role" type="radio" value="PATIENT" />{' '}
+            <span className="ml-2 font-bold">Paciente</span>
+          </label>
+          <label className="cursor-pointer rounded-xl border p-4 has-[:checked]:border-mint has-[:checked]:bg-emerald-50">
+            <input name="role" type="radio" value="DOCTOR" />{' '}
+            <span className="ml-2 font-bold">Médico</span>
+          </label>
+        </div>
+      </fieldset>
+      <Notice state={state} />
+      <Submit pending={pending}>Entrar a mi panel</Submit>
+      <p className="text-center text-xs text-slate-500">
+        Por seguridad, el rol administrador nunca está disponible en el registro público.
+      </p>
     </form>
   )
 }

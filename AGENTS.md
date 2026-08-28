@@ -36,8 +36,9 @@ El producto es uno, pero Next.js y NestJS son dos procesos desplegables. No desc
 
 ## Reglas funcionales que deben conservarse
 
-- El registro permite únicamente `PATIENT` y `DOCTOR`, exige verificación OTP por correo y completa el rol solo después de verificar la cuenta.
+- El registro permite únicamente `PATIENT` y `DOCTOR`. Con correo y contraseña exige verificación OTP antes de completar el rol; con Google OAuth intercambia el código PKCE en el servidor, considera verificado el correo del proveedor y completa o solicita el rol inicial después del callback.
 - `ADMIN` nunca se puede elegir en el registro público.
+- Google OAuth debe estar disponible tanto en registro como en inicio de sesión. El callback permitido es `/api/auth/callback`; conservar el verifier PKCE y la intención de registro en cookies `httpOnly`, validar cualquier redirección posterior como ruta interna y nunca devolver tokens al cliente.
 - Pacientes: pueden buscar médicos, revisar especialidades y reservar según la disponibilidad publicada.
 - Médicos: tienen un espacio propio con `Resumen`, `Perfil profesional`, `Agenda`, `Disponibilidad` y `Método de pago`. No deben ver el menú público para buscar médicos ni reservar citas.
 - `Método de pago` permite registrar varios destinos de desembolso en soles (`Yape` o cuenta bancaria) y elegir uno principal. Son instrucciones para que MediCerca pague al médico; nunca representan un pago directo del paciente.

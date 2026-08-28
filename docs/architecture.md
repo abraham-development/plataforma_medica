@@ -16,6 +16,8 @@ Navegador → Next.js → NestJS REST → InsForge PostgreSQL
 
 Una cuenta vive en `auth.users` y tiene su espejo operativo en `public.users`. `user_roles` permite varios roles por cuenta. Los perfiles de paciente y médico están separados. `ADMIN` no se ofrece en el registro público.
 
+El acceso admite correo/contraseña con OTP y Google OAuth con PKCE. En OAuth, Next.js inicia el flujo y procesa `/api/auth/callback` en el servidor para que el refresh token permanezca en una cookie `httpOnly`. Una cuenta nueva completa exclusivamente `PATIENT` o `DOCTOR`; las cuentas existentes conservan su rol y regresan a su panel.
+
 La defensa se aplica en dos capas: guards de NestJS y RLS/funciones `SECURITY DEFINER` en PostgreSQL. Las operaciones críticas (`book_appointment`, cancelación, cierre y acciones administrativas) vuelven a validar identidad, rol, propiedad y estado dentro de la transacción.
 
 ## Citas

@@ -31,8 +31,9 @@ Antes de cambiar una API o convención de Next.js, consultar la documentación i
 ## Autenticación
 
 - Usar `@insforge/sdk/ssr` para acciones y clientes SSR.
-- Registro público: nombre, correo, contraseña, confirmación, control mostrar/ocultar contraseña y rol `PATIENT` o `DOCTOR`.
-- La cuenta se completa únicamente después de verificar el OTP de seis dígitos enviado por correo.
+- Registro público: Google OAuth o nombre, correo, contraseña y confirmación; en ambos casos el rol inicial solo puede ser `PATIENT` o `DOCTOR`.
+- Con correo y contraseña, la cuenta se completa únicamente después de verificar el OTP de seis dígitos. Con Google OAuth, iniciar e intercambiar PKCE en el servidor mediante `/api/auth/callback`; si la cuenta es nueva, completar el rol elegido en registro o solicitarlo después del callback iniciado desde login.
+- Mostrar `Continuar con Google` tanto en `/registro` como en `/login`. Guardar verifier, intención, rol y destino seguro en cookies `httpOnly` de corta duración; nunca en `localStorage` ni en parámetros controlados sin validación.
 - Mantener access y refresh tokens bajo las convenciones SSR del SDK. No devolver tokens desde Server Actions ni guardarlos en `localStorage`.
 - Las cookies sensibles deben ser `httpOnly` cuando el navegador no necesite leerlas y `secure` en producción.
 

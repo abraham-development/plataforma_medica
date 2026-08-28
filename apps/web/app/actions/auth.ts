@@ -3,12 +3,97 @@ import { cookies } from 'next/headers'
 import { createAuthActions, createServerClient } from '@insforge/sdk/ssr'
 import { createClient } from '@insforge/sdk'
 import { redirect } from 'next/navigation'
+import { isPublicRegistrationRole, safeInternalPath } from '@/lib/insforge/auth-navigation'
 
 export type ActionState = { ok: boolean; message: string }
 const initial: ActionState = { ok: false, message: '' }
 
 function message(error: { message?: string } | null, fallback: string) {
   return error?.message ?? fallback
+}
+
+const oauthCookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  maxAge: 600,
+}
+
+function oauthErrorPath(intent: string) {
+  return intent === 'register'
+    ? '/registro?error=oauth_unavailable'
+    : '/login?error=oauth_unavailable'
+}
+
+export async function beginGoogleOAuth(formData: FormData) {
+  const intent = formData.get('oauth_intent') === 'register' ? 'register' : 'login'
+  const requestedRole = formData.get('role')
+  const nextPath = safeInternalPath(formData.get('next'), '/panel')
+
+  if (intent === 'register' && !isPublicRegistrationRole(requestedRole)) {
+    redirect('/registro?error=oauth_role_required')
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!appUrl) redirect(oauthErrorPath(intent))
+
+  const store = await cookies()
+  const auth = createAuthActions({ cookies: store })
+  const { data, error } = await auth.signInWithOAuth('google', {
+    redirectTo: new URL('/api/auth/callback', appUrl).toString(),
+    additionalParams: { prompt: 'select_account' },
+    skipBrowserRedirect: true,
+  })
+
+  if (error || !data?.url || !data.codeVerifier) redirect(oauthErrorPath(intent))
+
+  store.set('insforge_code_verifier', data.codeVerifier, oauthCookieOptions)
+  store.set('medicerca_oauth_intent', intent, oauthCookieOptions)
+  store.set('medicerca_oauth_next', nextPath, oauthCookieOptions)
+  if (isPublicRegistrationRole(requestedRole)) {
+    store.set('medicerca_oauth_role', requestedRole, oauthCookieOptions)
+  } else {
+    store.delete('medicerca_oauth_role')
+  }
+
+  redirect(data.url)
+}
+
+export async function completeOAuthRegistration(
+  _previous: ActionState = initial,
+  formData: FormData,
+): Promise<ActionState> {
+  const role = formData.get('role')
+  if (!isPublicRegistrationRole(role)) {
+    return { ok: false, message: 'Elige si usarás MediCerca como paciente o médico.' }
+  }
+
+  const store = await cookies()
+  const client = createServerClient({ cookies: store })
+  const currentUser = await client.auth.getCurrentUser()
+  if (currentUser.error || !currentUser.data.user) {
+    return { ok: false, message: 'Tu sesión venció. Inicia sesión nuevamente.' }
+  }
+
+  const registration = await client.database.rpc('complete_registration', {
+    initial_role: role,
+  })
+  if (registration.error) {
+    return {
+      ok: false,
+      message: message(registration.error, 'No pudimos completar tu perfil.'),
+    }
+  }
+
+  store.set('medicerca_role', role, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
+  })
+  return { ok: true, message: 'Perfil inicial creado.' }
 }
 
 export async function signUp(

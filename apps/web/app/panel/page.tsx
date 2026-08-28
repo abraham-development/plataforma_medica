@@ -10,15 +10,5 @@ export default async function PanelPage() {
   if (values.includes('ADMIN')) redirect('/admin')
   if (values.includes('DOCTOR')) redirect('/medico')
   if (values.includes('PATIENT')) redirect('/paciente')
-  return (
-    <section className="container-page py-14">
-      <div className="card p-8">
-        <h1 className="text-3xl font-black">Terminemos tu registro</h1>
-        <p className="mt-3 text-slate-600">
-          Tu cuenta está verificada, pero falta asignar el perfil inicial. Vuelve al registro para
-          completar la verificación.
-        </p>
-      </div>
-    </section>
-  )
+  redirect('/completar-registro')
 }

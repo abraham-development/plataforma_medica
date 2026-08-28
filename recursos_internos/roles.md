@@ -55,6 +55,8 @@ La identidad, autenticación y credenciales pertenecen a `User`.
 
 Los roles determinan qué puede hacer cada usuario.
 
+La identidad admite dos entradas públicas: correo y contraseña con verificación OTP, o Google OAuth con PKCE procesado en el servidor. Google autentica a la persona, pero nunca decide su rol: una cuenta nueva todavía debe elegir exclusivamente `PATIENT` o `DOCTOR` y `ADMIN` continúa fuera del registro público.
+
 Modelo conceptual:
 
 ```text
