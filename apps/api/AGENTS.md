@@ -52,6 +52,9 @@ La API tiene:
 - `PUT /api/v1/doctors/me/availability` reemplaza la disponibilidad mediante la RPC `replace_doctor_availability_dates`.
 - Conservar el límite de 600 elementos y la validación DTO.
 - La reserva debe ser atómica y rechazar bloques ocupados o no disponibles; preferir RPC transaccionales para estas reglas.
+- El directorio público solo devuelve médicos `VERIFIED`. La verificación es `PENDING`, `VERIFIED`, `REJECTED` o `SUSPENDED`; el estado de cuenta es `ACTIVE` o `SUSPENDED`.
+- Los cambios administrativos de médicos, cuentas y especialidades usan las RPC `admin_set_doctor_status`, `admin_set_account_status` y `admin_upsert_specialty`.
+- Los destinos de desembolso viven en `doctors/me/payout-methods` para el médico y en las rutas de administración enmascaradas para `ADMIN`. Revelar un valor completo queda auditado. La API no cobra al paciente ni transfiere dinero.
 
 ## Variables y puertos
 

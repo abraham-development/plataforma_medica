@@ -25,8 +25,13 @@ Antes de cambiar una API o convención de Next.js, consultar la documentación i
 - No mostrar al médico autenticado el menú público de búsqueda, especialidades o funcionamiento, ni agregarle flujos para reservar con otro médico.
 - Paciente y administrador conservan layouts y permisos separados.
 - `Método de pago` administra destinos de desembolso de MediCerca en PEN (`Yape` o cuenta bancaria), admite varios y uno principal. Enmascarar los valores guardados; los números completos solo se revelan al administrador mediante el endpoint auditado y nunca deben persistirse en almacenamiento del navegador.
+- Paciente: `Panel del paciente`, con `Resumen`, `Mis citas`, `Mi perfil` y `Buscar médicos`.
+- Administrador: `/admin` con `Dashboard`, `Médicos`, `Usuarios`, `Especialidades`, `Citas`, `Pagos a médicos` y `Auditoría`.
 - Los layouts de rol deben validar sesión y rol en el servidor antes de renderizar el panel.
-- El encabezado resuelve la sesión con el cliente SSR del navegador para no bloquear ni volver dinámicas las páginas públicas. La cookie `medicerca_role` es solo una pista de navegación; nunca reemplaza la validación autoritativa de los layouts protegidos.
+- El encabezado público es cliente y consulta `GET /api/auth/session`. En rutas públicas esa llamada compite con un tiempo máximo de 4 segundos: si falla o vence, el encabezado permanece anónimo y la página sigue estática. Dentro de un panel espera la sesión. Se vuelve a cargar con los eventos `medicerca:auth-changed` y `medicerca:profile-changed`.
+- `apps/web/proxy.ts` refresca la sesión con `updateSession`. Un error transitorio de autenticación deja pasar las páginas públicas y, en `/paciente`, `/medico` o `/admin`, redirige a `/sesion-no-disponible?next=` sin cerrar la sesión. Un fallo definitivo en esos paneles redirige a `/login?reason=session-expired`. `/api/auth/refresh` queda fuera del matcher del proxy.
+- La cookie `medicerca_role` es solo una pista de navegación. Si vale `DOCTOR`, el proxy envía `/medicos` a `/medico`. El encabezado hace lo mismo cuando la sesión resuelta es `DOCTOR`. Esa cookie nunca reemplaza la validación de los layouts protegidos.
+- El nombre visible sale, en este orden, del nombre y apellido del perfil, del nombre de registro y de `users.display_name`.
 
 ## Autenticación
 

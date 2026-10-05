@@ -25,6 +25,14 @@ El producto es uno, pero Next.js y NestJS son dos procesos desplegables. No desc
 - Al trabajar dentro de una aplicación, aplicar este archivo y el `AGENTS.md` más cercano. Si una indicación local es más específica, tiene precedencia para ese ámbito.
 - No editar artefactos generados en `.next`, `dist`, `.turbo`, `coverage` o `node_modules`.
 
+## Memoria entre sesiones
+
+Estos `AGENTS.md` son la memoria persistente del repositorio. Una sesión nueva no hereda el chat anterior: hereda lo que quede escrito aquí.
+
+Cuando una decisión durable cambie —reglas de producto, autenticación, navegación por rol, contratos HTTP, esquema, despliegue o un fallo ya diagnosticado— actualizar el `AGENTS.md` más cercano en el mismo cambio. Sustituir la frase que dejó de ser cierta. No agregar un historial de versiones ni notas de depuración pasajeras.
+
+Dejar el procedimiento largo en `docs/architecture.md` o `docs/operations.md` y conservar aquí la restricción que un agente volvería a descubrir. El bloque `INSFORGE:START` / `INSFORGE:END` lo reescribe la integración de InsForge; la nota de la migración pendiente que vive dentro debe permanecer.
+
 ## Fuentes de verdad
 
 - `recursos_internos/roles.md`: capacidades y restricciones por rol.
@@ -39,8 +47,13 @@ El producto es uno, pero Next.js y NestJS son dos procesos desplegables. No desc
 - El registro permite únicamente `PATIENT` y `DOCTOR`. Con correo y contraseña exige verificación OTP antes de completar el rol; con Google OAuth intercambia el código PKCE en el servidor, considera verificado el correo del proveedor y completa o solicita el rol inicial después del callback.
 - `ADMIN` nunca se puede elegir en el registro público.
 - Google OAuth debe estar disponible tanto en registro como en inicio de sesión. El callback permitido es `/api/auth/callback`; conservar el verifier PKCE y la intención de registro en cookies `httpOnly`, validar cualquier redirección posterior como ruta interna y nunca devolver tokens al cliente.
-- Pacientes: pueden buscar médicos, revisar especialidades y reservar según la disponibilidad publicada.
-- Médicos: tienen un espacio propio con `Resumen`, `Perfil profesional`, `Agenda`, `Disponibilidad` y `Método de pago`. No deben ver el menú público para buscar médicos ni reservar citas.
+- Pacientes: pueden buscar médicos, revisar especialidades y reservar según la disponibilidad publicada. Su panel es `Panel del paciente`, con `Resumen`, `Mis citas`, `Mi perfil` y `Buscar médicos`.
+- Médicos: tienen un espacio propio con `Resumen`, `Perfil profesional`, `Agenda`, `Disponibilidad` y `Método de pago`. El rótulo es `Panel médico`. No deben ver el menú público para buscar médicos ni reservar citas. Si la cookie `medicerca_role` o la sesión resuelta indican `DOCTOR`, `/medicos` redirige a `/medico`.
+- Administradores: panel en `/admin` con `Dashboard`, `Médicos`, `Usuarios`, `Especialidades`, `Citas`, `Pagos a médicos` y `Auditoría`. La verificación médica es `PENDING`, `VERIFIED`, `REJECTED` o `SUSPENDED`; el directorio público y la reserva solo aceptan `VERIFIED`. El estado de cuenta es `ACTIVE` o `SUSPENDED`. Esas mutaciones pasan por RPC y quedan auditadas.
+- `/panel` envía a `/admin`, luego a `/medico`, luego a `/paciente`. Sin rol, continúa en `/completar-registro`. Si una cuenta tiene varios roles, el encabezado público prefiere `DOCTOR` sobre `PATIENT`.
+- El directorio público solo lista médicos `VERIFIED`.
+- La consulta `VIRTUAL` copia a la cita el `virtual_meeting_url` HTTPS del perfil médico. No hay videollamada propia.
+- El cobro al paciente, las comisiones, la conciliación, la transferencia efectiva, las historias clínicas y las recetas quedan fuera del MVP. `Método de pago` solo guarda instrucciones de desembolso.
 - `Método de pago` permite registrar varios destinos de desembolso en soles (`Yape` o cuenta bancaria) y elegir uno principal. Son instrucciones para que MediCerca pague al médico; nunca representan un pago directo del paciente.
 - Los destinos de pago son datos financieros personales: el médico solo accede a los propios mediante RLS; el administrador ve resúmenes enmascarados y cada revelado explícito de los valores completos debe quedar auditado. No registrar números completos en logs ni respuestas de error.
 - La disponibilidad médica usa fechas concretas, bloques de 30 minutos, zona horaria `America/Lima` y únicamente modalidades habilitadas en el perfil profesional.
@@ -91,9 +104,11 @@ Turbo separa las variables de cada proceso. En particular, no pasar `PORT=4000` 
 
 La estrategia actual es **Hostinger Deploy Web App administrado**, sin Docker Compose:
 
-1. Desplegar Next.js como una Web App, por ejemplo en `medicerca.com`.
+1. Desplegar Next.js como una Web App. El origen público previsto es `medicerca.com`; el origen ya autorizado en `insforge.toml` es el preview `https://darkblue-sardine-667162.hostingersite.com`.
 2. Desplegar NestJS como otra Web App desde el mismo repositorio, por ejemplo en `api.medicerca.com`.
 3. Registrar las variables de cada aplicación en el panel de Hostinger; no subir `.env.production`.
+
+`insforge.toml` autoriza, para localhost y para ese preview, `/login`, `/api/auth/callback` y `/recuperar-contrasena`. `medicerca.com` todavía no está en `allowed_redirect_urls`. Al cambiar de dominio, añadir primero el callback de ese origen y aplicar la configuración antes de desplegar la web. En Google Cloud el redirect autorizado es el de InsForge (`https://<appkey>.us-east.insforge.app/api/auth/oauth/google/callback`); Google debe figurar en `auth.oAuthProviders`. La política de contraseña vigente exige mínimo 8 caracteres, número, minúscula y mayúscula. La verificación de correo y la recuperación usan código.
 
 En hPanel, la Web App de Next.js usa raíz `apps/web`, Node 24, npm, build `npm run build` y salida `.next`. Esta excepción evita que el runtime pierda `next` por los enlaces del almacén pnpm ubicado en la raíz del monorepo. El desarrollo local y la API continúan usando pnpm.
 
